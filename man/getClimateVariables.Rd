@@ -12,7 +12,10 @@ getClimateVariables(
   longDeg,
   elevM,
   modelName,
-  isEphemeral
+  isEphemeral,
+  rep = 1,
+  rcp = "RCP45",
+  climModel = "RCM4"
 )
 }
 \arguments{
@@ -32,7 +35,25 @@ getClimateVariables(
 
 \item{isEphemeral}{a logical. If set to true, the generated climate is not stored on the server, which implies a greater
 computational burden and inconsistencies if different models are applied on the same locations.}
+
+\item{rep}{number of replicates of generated climate (is set to 1 by default)}
+
+\item{rcp}{an representative concentration pathway (either "RCP45" or "RCP85")}
+
+\item{climModel}{a climatic model (either "RCM4", "GCM4" or "Hadley")}
+}
+\value{
+a data.frame object
 }
 \description{
 Generates the climate for particular locations and applies a model on this generated climate.
+}
+\examples{
+
+locations <- BioSIM::twoLocationsInSouthernQuebec
+# degreeDays <- getClimateVariables(2017, 2021, locations$id, locations$latDeg,
+#                                locations$longDeg, locations$elevM, "DegreeDay_Annual",
+#                                F, rcp = "RCP85", climModel = "GCM4") ## not run
+
+
 }

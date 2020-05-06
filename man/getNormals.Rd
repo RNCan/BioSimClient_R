@@ -11,11 +11,13 @@ getNormals(
   latDeg,
   longDeg,
   elevM,
-  averageOverTheseMonths
+  averageOverTheseMonths,
+  rcp = "RCP45",
+  climModel = "RCM4"
 )
 }
 \arguments{
-\item{period}{a string representing the period (either "1951_1980", "1961_1990", "1971_2000" or "1981_2010")}
+\item{period}{a string representing the period (either "1951_1980", "1961_1990", "1971_2000", "1981_2010" up to "2071_2100")}
 
 \item{variables}{the variables of interest typically a vector such as c("TN", "TX", "P") for minimum temperature, maximum temperature and precipitation}
 
@@ -28,6 +30,10 @@ getNormals(
 \item{elevM}{the elevations of the plots (can contain some NA, in which case BioSim relies on a digital elevation model)}
 
 \item{averageOverTheseMonths}{a vector with some months if there is a need for aggregating the climate varibles}
+
+\item{rcp}{an representative concentration pathway (either "RCP45" or "RCP85")}
+
+\item{climModel}{a climatic model (either "RCM4", "GCM4" or "Hadley")}
 }
 \value{
 a data.frame object
@@ -35,4 +41,13 @@ a data.frame object
 \description{
 If the argument averageOverTheseMonths is left NULL or empty, the monthly normals are provided. If
 this argument is filled with some months, then the normal are aggregated over these months.
+}
+\examples{
+
+locations <- BioSIM::twoLocationsInSouthernQuebec
+variables <- c("TN","TX","P")
+# summerMean <- getNormals("1981_2010", variables, locations$id, locations$latDeg,
+#                        locations$longDeg, locations$elevM,
+#                        c("June", "July", "August")) ## not run
+
 }
