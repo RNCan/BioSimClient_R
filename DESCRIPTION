@@ -1,11 +1,11 @@
 Package: BioSIM
 Type: Package
-Title: BioSIM Client for Climate Variables 
-Version: 0.1.4
-Author: Mathieu Fortin
+Title: 'BioSIM' Client for Climate Variables 
+Version: 0.1.0
+Author: Mathieu Fortin and Remi Saint-Amant
 Maintainer: Mathieu Fortin <mathieu.fortin.re@gmail.com>
-Description: Provide a client that retrieves the climate variables from the original BioSIM application
-   hosted on a server. The BioSIM application is being developed by the Canadian Forest Service.
+Description: Provide a client that retrieves the climate variables from the original 'BioSIM' application
+   hosted on a server. The 'BioSIM' application is being developed by the Canadian Forest Service.
 URL: https://sourceforge.net/p/mrnfforesttools/biosimclient/wiki/Home/
 Depends: R (>= 3.4.0)
 Imports: 

@@ -4,10 +4,19 @@
 \alias{getAnnualNormals}
 \title{Return the annual normals for a period}
 \usage{
-getAnnualNormals(period, variables, id, latDeg, longDeg, elevM)
+getAnnualNormals(
+  period,
+  variables,
+  id,
+  latDeg,
+  longDeg,
+  elevM,
+  rcp = "RCP45",
+  climModel = "RCM4"
+)
 }
 \arguments{
-\item{period}{a string representing the period (either "1951_1980", "1961_1990", "1971_2000" or "1981_2010")}
+\item{period}{a string representing the period (either "1951_1980", "1961_1990", "1971_2000", "1981_2010" up to "2071_2100")}
 
 \item{variables}{the variables of interest typically a vector such as c("TN", "TX", "P") for minimum temperature, maximum temperature and precipitation}
 
@@ -18,6 +27,10 @@ getAnnualNormals(period, variables, id, latDeg, longDeg, elevM)
 \item{longDeg}{the longitudes of the plots}
 
 \item{elevM}{the elevations of the plots (can contain some NA, in which case BioSim relies on a digital elevation model)}
+
+\item{rcp}{an representative concentration pathway (either "RCP45" or "RCP85")}
+
+\item{climModel}{a climatic model (either "RCM4", "GCM4" or "Hadley")}
 }
 \value{
 a data.frame object

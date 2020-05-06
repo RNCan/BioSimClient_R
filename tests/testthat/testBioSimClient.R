@@ -71,6 +71,17 @@ test_that("Testing that 1981-2010 summer normals for Quebec and Sorel can be pro
   expect_equal(abs(summerMean[which(summerMean$id == "Sorel"),"P"] - 302.9) < 1E-4, TRUE)
 })
 
+normals <- getAnnualNormals("2061_2090", variables, locations$id, locations$latDeg, locations$longDeg, locations$elevM, rcp="RCP85", climModel="Hadley")
+test_that("Testing that 2061-2090 annual normals under RCP 8.5 and climate model Hadley for Quebec and Sorel can be properly retrieved", {
+  expect_equal(abs(normals[which(normals$id == "Quebec"),"TN"] - 7.672329) < 1E-4, TRUE)
+  expect_equal(abs(normals[which(normals$id == "Quebec"),"TX"] - 16.32219) < 1E-4, TRUE)
+  expect_equal(abs(normals[which(normals$id == "Quebec"),"P"] - 1378.0) < 1E-4, TRUE)
+  expect_equal(abs(normals[which(normals$id == "Sorel"),"TN"] - 8.473699) < 1E-4, TRUE)
+  expect_equal(abs(normals[which(normals$id == "Sorel"),"TX"] - 17.89041) < 1E-4, TRUE)
+  expect_equal(abs(normals[which(normals$id == "Sorel"),"P"] - 1159.2) < 1E-4, TRUE)
+})
+
+
 degreeDays <- getClimateVariables(1994, 2002, locations$id, locations$latDeg, locations$longDeg, locations$elevM, "DegreeDay_Annual", F)
 
 test_that("Testing degree-days between 1994 and 2004 for Quebec and Sorel can be properly retrieved", {
@@ -96,7 +107,7 @@ test_that("Testing degree-days between 1994 and 2004 for Quebec and Sorel can be
 
 growingSeason <- getClimateVariables(1994, 2002, locations$id, locations$latDeg, locations$longDeg, locations$elevM, "GrowingSeason", F)
 
-test_that("Testing degree-days between 1994 and 2004 for Quebec and Sorel can be properly retrieved", {
+test_that("Testing growing season between 1994 and 2004 for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(growingSeason[which(growingSeason$id == "Quebec" & growingSeason$Year == 1994),"Length"] - 172) < 1E-4, TRUE)
   expect_equal(abs(growingSeason[which(growingSeason$id == "Quebec" & growingSeason$Year == 1995),"Length"] - 187) < 1E-4, TRUE)
   expect_equal(abs(growingSeason[which(growingSeason$id == "Quebec" & growingSeason$Year == 1996),"Length"] - 171) < 1E-4, TRUE)
@@ -115,6 +126,21 @@ test_that("Testing degree-days between 1994 and 2004 for Quebec and Sorel can be
   expect_equal(abs(growingSeason[which(growingSeason$id == "Sorel" & growingSeason$Year == 2000),"Length"] - 200) < 1E-4, TRUE)
   expect_equal(abs(growingSeason[which(growingSeason$id == "Sorel" & growingSeason$Year == 2001),"Length"] - 216) < 1E-4, TRUE)
   expect_equal(abs(growingSeason[which(growingSeason$id == "Sorel" & growingSeason$Year == 2002),"Length"] - 173) < 1E-4, TRUE)
+})
+
+degreeDays <- getClimateVariables(2017, 2021, locations$id, locations$latDeg, locations$longDeg, locations$elevM, "DegreeDay_Annual", T, rcp = "RCP85", climModel = "GCM4")
+
+test_that("Testing degree-days between 2017 and 2021 under RCP 8.5 and climate model GCM4 for Quebec and Sorel can be properly retrieved", {
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2017),"DD"] - 2840.05) < 1E-4, TRUE)
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2018),"DD"] - 2740.50) < 1E-4, TRUE)
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2019),"DD"] - 2703.95) < 1E-4, FALSE)
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2020),"DD"] - 3064.90) < 1E-4, FALSE)
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2021),"DD"] - 3216.00) < 1E-4, FALSE)
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2017),"DD"] - 3552.60) < 1E-4, TRUE)
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2018),"DD"] - 3454.60) < 1E-4, TRUE)
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2019),"DD"] - 3233.45) < 1E-4, FALSE)
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2020),"DD"] - 3361.55) < 1E-4, FALSE)
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2021),"DD"] - 3612.30) < 1E-4, FALSE)
 })
 
 J4R::shutdownJava()
