@@ -16,7 +16,7 @@ print(locations)
 
 variables <- c("TN","TX","P")
 
-normals <- getAnnualNormals("1981_2010", variables, locations$id, locations$latDeg, locations$longDeg, locations$elevM)
+normals <- getAnnualNormals("1981_2010", variables, locations$id, locations$latDeg, locations$longDeg, locations$elevM, memSize = 500)
 
 test_that("Testing that 1981-2010 annual normals for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(normals[which(normals$id == "Quebec"),"TN"] - -0.1383562) < 1E-4, TRUE)
@@ -82,7 +82,7 @@ test_that("Testing that 2061-2090 annual normals under RCP 8.5 and climate model
 })
 
 
-degreeDays <- getClimateVariables(1994, 2002, locations$id, locations$latDeg, locations$longDeg, locations$elevM, "DegreeDay_Annual", F)
+degreeDays <- getModelOutput(1994, 2002, locations$id, locations$latDeg, locations$longDeg, locations$elevM, "DegreeDay_Annual", F)
 
 test_that("Testing degree-days between 1994 and 2004 for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 1994),"DD"] - 2802.15) < 1E-4, TRUE)
@@ -105,7 +105,7 @@ test_that("Testing degree-days between 1994 and 2004 for Quebec and Sorel can be
   expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2002),"DD"] - 3232.50) < 1E-4, TRUE)
 })
 
-growingSeason <- getClimateVariables(1994, 2002, locations$id, locations$latDeg, locations$longDeg, locations$elevM, "GrowingSeason", F)
+growingSeason <- getModelOutput(1994, 2002, locations$id, locations$latDeg, locations$longDeg, locations$elevM, "GrowingSeason", F)
 
 test_that("Testing growing season between 1994 and 2004 for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(growingSeason[which(growingSeason$id == "Quebec" & growingSeason$Year == 1994),"Length"] - 172) < 1E-4, TRUE)
@@ -128,7 +128,7 @@ test_that("Testing growing season between 1994 and 2004 for Quebec and Sorel can
   expect_equal(abs(growingSeason[which(growingSeason$id == "Sorel" & growingSeason$Year == 2002),"Length"] - 173) < 1E-4, TRUE)
 })
 
-degreeDays <- getClimateVariables(2017, 2021, locations$id, locations$latDeg, locations$longDeg, locations$elevM, "DegreeDay_Annual", T, rcp = "RCP85", climModel = "GCM4")
+degreeDays <- getModelOutput(2017, 2021, locations$id, locations$latDeg, locations$longDeg, locations$elevM, "DegreeDay_Annual", T, rcp = "RCP85", climModel = "GCM4")
 
 test_that("Testing degree-days between 2017 and 2021 under RCP 8.5 and climate model GCM4 for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2017),"DD"] - 2840.05) < 1E-4, TRUE)

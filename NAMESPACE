@@ -2,7 +2,7 @@
 
 export(allMonths)
 export(getAnnualNormals)
-export(getClimateVariables)
 export(getModelList)
+export(getModelOutput)
 export(getMonthlyNormals)
 export(getNormals)
