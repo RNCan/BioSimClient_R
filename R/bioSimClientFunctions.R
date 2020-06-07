@@ -298,8 +298,12 @@ getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, 
   if (length(id) != length(latDeg)) {
     stop("The arguments id, latDeg, longDeg and elevM must have the same length!")
   }
-  if (!is.null(additionalParms) & is.null(names(additionalParms))) {
-    stop("The vector additionalParms must be a named vector!")
+  if (!is.null(additionalParms)) {
+    if (is.null(names(additionalParms))) {
+      stop("The vector additionalParms must be a named vector!")
+    } else if (length(names(additionalParms)) != length(unique(names(additionalParms)))) {
+      stop("The names in the named vector must be unique!")
+    }
   }
 #  listOfModels <- getModelList()
 #  if (!(modelName %in% listOfModels)) {

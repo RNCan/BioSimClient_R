@@ -143,6 +143,15 @@ test_that("Testing degree-days between 2017 and 2021 under RCP 8.5 and climate m
   expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2021),"DD"] - 3612.30) < 1E-4, FALSE)
 })
 
+degreeDays <- getModelOutput(2017, 2018, locations$id, locations$latDeg, locations$longDeg, locations$elevM, "DegreeDay_Annual", T, additionalParms = c("LowerThreshold"=5))
+
+test_that("Testing degree-days above 5C in 2017 and 2018 can be properly retrieved", {
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2017),"DD"] - 1789.10) < 1E-4, TRUE)
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2018),"DD"] - 1781.80) < 1E-4, TRUE)
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2017),"DD"] - 2396.45) < 1E-4, TRUE)
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2018),"DD"] - 2390.85) < 1E-4, TRUE)
+})
+
 J4R::shutdownJava()
 
 
