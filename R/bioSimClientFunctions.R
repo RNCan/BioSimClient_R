@@ -345,3 +345,40 @@ getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, 
 
   return(outputDataFrame)
 }
+
+#'
+#' Checks whether or not the multi threading is enabled.
+#'
+#' The multi threading allows to send multiple requests simultaneously. It
+#' is handled by the back-end Java client. This method returns true if
+#' this option is enabled (which is the default value).
+#'
+#' @param memSize to set the JVM size in Mb if it is not instantiated yet. This is optional. If not specified, the JVM is instantiated with
+#' the default size.
+#' @return a logical
+#'
+#' @export
+isMultithreadingEnabled <- function(memSize = NULL) {
+  .connectToBioSIMClient(memSize)
+  return(J4R::callJavaMethod("biosimclient.BioSimClient", "isMultithreadingEnabled"))
+
+}
+
+
+#'
+#' Enables or disables the multi threading.
+#'
+#' The multi threading allows to send multiple requests simultaneously. It
+#' is handled by the back-end Java client. It is enabled by default.
+#'
+#' @param memSize to set the JVM size in Mb if it is not instantiated yet. This is optional. If not specified, the JVM is instantiated with
+#' the default size.
+#' @param enabled a logical
+#'
+#' @export
+setMultithreadingEnabled <- function(enabled, memSize = NULL) {
+  .connectToBioSIMClient(memSize)
+  J4R::callJavaMethod("biosimclient.BioSimClient", "setMultithreadingEnabled", enabled)
+}
+
+

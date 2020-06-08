@@ -127,14 +127,15 @@ public final class BioSimClient {
 			}
 		}
 	}
-
+	
 	static {
 		Runtime.getRuntime().addShutdownHook(new InternalShutDownHook());
 	}
 
-	
 	static final List<Month> AllMonths = Arrays.asList(Month.values());
 
+	private static boolean MultithreadingEnabled = true; // Default value
+	
 	private static LinkedHashMap<BioSimPlot, BioSimDataSet> internalCalculationForNormals(Period period,
 			List<Variable> variables, List<BioSimPlot> locations,
 			RCP rcp,
@@ -183,7 +184,23 @@ public final class BioSimClient {
 	}
 
 
-	
+	/**
+	 * Enables the multithreading when calling the getModelOutput method. By 
+	 * default the multithreading is enabled.
+	 * @param bool a boolean 
+	 */
+	public static void setMultithreadingEnabled(boolean bool) {
+		BioSimClient.MultithreadingEnabled = bool;
+	}
+
+	/**
+	 * True if the multithreading is enabled (by default) or
+	 * false otherwise.
+	 * @return a boolean
+	 */
+	public static boolean isMultithreadingEnabled() {
+		return BioSimClient.MultithreadingEnabled;
+	}
 	
 	
 	/**
@@ -401,6 +418,7 @@ public final class BioSimClient {
 			query += "&rep=" + rep;
 		}
 		
+//		System.out.println("Sending request!");
 		String serverReply = getStringFromConnection(GENERATOR_API, query);
 
 		String[] ids = serverReply.split(" ");
@@ -626,7 +644,36 @@ public final class BioSimClient {
 
 		Map<BioSimPlot, String> generatedClimate = new HashMap<BioSimPlot, String>();
 		if (!locationsToGenerate.isEmpty()) { // here we generate the climate if needed
-			generatedClimate.putAll(BioSimClient.getGeneratedClimate(fromYr, toYr, locationsToGenerate, rcp, climMod, rep));
+			int locationsToGenerateSize = locationsToGenerate.size();
+			int potentialNumberOfWorkers = 5; 				// TODO find an appropriate number of workers here
+			if (BioSimClient.MultithreadingEnabled && locationsToGenerateSize >= potentialNumberOfWorkers * 3) {	// otherwise singlethreading
+				BioSimWorker[] workers = new BioSimWorker[potentialNumberOfWorkers]; 
+				int nbByThreads = (int) Math.round((double) locationsToGenerateSize / potentialNumberOfWorkers); 
+				for (int i = 0; i < workers.length; i++) {
+					int from = i * nbByThreads;
+					int to = (i+1) * nbByThreads - 1;
+					if (i == workers.length - 1) {
+						to = locationsToGenerateSize - 1;
+					}
+					workers[i] = new BioSimWorker(fromYr, toYr, locationsToGenerate, rcp, climMod, rep, from, to);
+				}
+				for (int i = 0; i < workers.length; i++) {
+					try {
+						workers[i].join();
+						if (workers[i].e == null) {
+							generatedClimate.putAll(workers[i].output);
+						} else {
+							throw workers[i].e;		// FIXME there is a possibility that a thread keeps running here
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+						throw new BioSimClientException(e.getMessage());
+					} 
+				}
+			} else {
+				generatedClimate.putAll(BioSimClient.getGeneratedClimate(fromYr, toYr, locationsToGenerate, rcp, climMod, rep));
+			}
+			
 			if (!isEphemeral) { // then we stored the reference in the static map for future use
 				for (BioSimPlot location : generatedClimate.keySet()) {
 					GeneratedClimateMap.put(new BioSimQuerySignature(fromYr, toYr, location, rcp, climMod, rep),
