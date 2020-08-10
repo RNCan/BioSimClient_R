@@ -16,8 +16,7 @@ getModelOutput(
   rep = 1,
   rcp = "RCP45",
   climModel = "RCM4",
-  additionalParms = NULL,
-  memSize = NULL
+  additionalParms = NULL
 )
 }
 \arguments{
@@ -45,8 +44,6 @@ computational burden and inconsistencies if different models are applied on the 
 \item{climModel}{a climatic model (either "RCM4", "GCM4" or "Hadley")}
 
 \item{additionalParms}{a named vector with the additional parameters if needed}
-
-\item{memSize}{the size of the Java Virtual Machine (optional)}
 }
 \value{
 a data.frame object

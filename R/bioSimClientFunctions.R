@@ -5,68 +5,6 @@
 ########################################################
 
 
-.welcomeMessage <- function() {
-  packageStartupMessage("Welcome to BioSIM!")
-  packageStartupMessage("The BioSIM package implements a client that retrieves climate variable from the")
-  packageStartupMessage("original BioSIM application hosted on a server. ")
-  packageStartupMessage("Please, make sure that Java (version 8 or later) is installed on your computer.")
-  packageStartupMessage("For more information, visit https://sourceforge.net/p/mrnfforesttools/biosimclient/wiki/Home/.")
-}
-
-.onAttach <- function(libname, pkgname) {
-  .welcomeMessage()
-}
-
-
-.addToArray <- function(refArray, array) {
-  if (length(refArray) != length(array)) {
-    stop("Incompatible array length!")
-  } else {
-    for (i in 1:length(array)) {
-      refArray[[i]] <- c(refArray[[i]], array[[i]])
-    }
-  }
-  return(refArray)
-}
-
-.convertJavaDataSetIntoDataFrame <- function(dataSetObject) {
-  refArray <- NULL
-  observations <- J4R::callJavaMethod(dataSetObject, "getObservations")
-  observations <- J4R::getAllValuesFromListObject(observations)
-  for (obs in observations) {
-    array <- J4R::callJavaMethod(obs, "toArray")
-    array <- as.list(J4R::getAllValuesFromArray(array))
-    if (is.null(refArray)) {
-      refArray <- array
-    } else {
-      refArray <- .addToArray(refArray, array)
-    }
-  }
-  dataFrame <- NULL
-  for (i in 1:length(refArray)) {
-    dataFrame <- as.data.frame(cbind(dataFrame, refArray[[i]]))
-  }
-  colnames(dataFrame) <- J4R::getAllValuesFromListObject(J4R::callJavaMethod(dataSetObject, "getFieldNames"))
-  return(dataFrame)
-}
-
-
-.loadBioSIMClient <- function() {
-  if (!J4R::checkIfClasspathContains("biosimclient.jar")) {
-    J4R::addUrlToClassPath("biosimclient.jar", packageName = "BioSIM")
-  }
-}
-
-
-.connectToBioSIMClient <- function(memSize = NULL) {
-  if (!J4R::isConnectedToJava()) {
-    J4R::connectToJava(memorySize = memSize)
-  }
-  .loadBioSIMClient()
-}
-
-
-
 #'
 #' A list of two plots located in southern Quebec
 #'
@@ -91,7 +29,7 @@ allMonths <- c("January", "February", "March", "April", "May", "June", "July", "
     if (length(latDeg) == length(elevM)) {
       jList <- J4R::createJavaObject("java.util.ArrayList")
       jPlots <- J4R::createJavaObject("biosimclient.BioSimPlotImpl", latDeg, longDeg, elevM)
-      J4R::callJavaMethod(jList, "add", jPlots)
+      jList$add(jPlots)
       return(jList)
     }
   }
@@ -102,7 +40,7 @@ allMonths <- c("January", "February", "March", "April", "May", "June", "July", "
 .createVariableList <- function(variables) {
   myVariables <- J4R::createJavaObject("biosimclient.BioSimEnums$Variable", variables)
   jList <- J4R::createJavaObject("java.util.ArrayList")
-  J4R::callJavaMethod(jList, "add", myVariables)
+  jList$add(myVariables)
   return(jList)
 }
 
@@ -122,7 +60,6 @@ allMonths <- c("January", "February", "March", "April", "May", "June", "July", "
 #' @param averageOverTheseMonths a vector with some months if there is a need for aggregating the climate varibles
 #' @param rcp an representative concentration pathway (either "RCP45" or "RCP85")
 #' @param climModel a climatic model (either "RCM4", "GCM4" or "Hadley")
-#' @param memSize the size of the Java Virtual Machine (optional)
 #'
 #' @return a data.frame object
 #'
@@ -135,7 +72,7 @@ allMonths <- c("January", "February", "March", "April", "May", "June", "July", "
 #' #                        c("June", "July", "August")) ## not run
 #'
 #' @export
-getNormals <- function(period, variables, id, latDeg, longDeg, elevM, averageOverTheseMonths, rcp="RCP45", climModel = "RCM4", memSize = NULL) {
+getNormals <- function(period, variables, id, latDeg, longDeg, elevM, averageOverTheseMonths, rcp="RCP45", climModel = "RCM4") {
   # For debugging
   # period <- "1981_2010"
   # id <- locations$id
@@ -152,20 +89,22 @@ getNormals <- function(period, variables, id, latDeg, longDeg, elevM, averageOve
       }
     }
   }
-  .connectToBioSIMClient(memSize = memSize)
+  .connectToBioSIMClient()
   jPlots <- .createBioSimPlots(latDeg, longDeg, elevM)
 
   jAverageOverTheseMonths <- J4R::createJavaObject("java.util.ArrayList")
   isSummarized <- F
   if (!is.null(averageOverTheseMonths) && length(averageOverTheseMonths) > 0) {
-    J4R::callJavaMethod(jAverageOverTheseMonths, "add", J4R::createJavaObject("biosimclient.BioSimEnums$Month", averageOverTheseMonths))
+    jAverageOverTheseMonths$add(J4R::createJavaObject("biosimclient.BioSimEnums$Month", averageOverTheseMonths))
     isSummarized <- T
   }
   jPeriod <- J4R::createJavaObject("biosimclient.BioSimEnums$Period", paste("FromNormals", period, sep=""))
   jVariables <- .createVariableList(variables)
   jRCP <- J4R::createJavaObject("biosimclient.BioSimEnums$RCP", rcp)
   jClimModel <- J4R::createJavaObject("biosimclient.BioSimEnums$ClimateModel", climModel)
+
   maps <- J4R::callJavaMethod("biosimclient.BioSimClient", "getNormals", jPeriod, jVariables, jPlots, jRCP, jClimModel, jAverageOverTheseMonths)
+
   listOfPlots <- J4R::getAllValuesFromListObject(jPlots)
 
   outputDataFrame <- .formatDataFrame(listOfPlots, maps, id)
@@ -185,13 +124,12 @@ getNormals <- function(period, variables, id, latDeg, longDeg, elevM, averageOve
 #' @param elevM the elevations of the plots (can contain some NA, in which case BioSim relies on a digital elevation model)
 #' @param rcp an representative concentration pathway (either "RCP45" or "RCP85")
 #' @param climModel a climatic model (either "RCM4", "GCM4" or "Hadley")
-#' @param memSize the size of the Java Virtual Machine (optional)
 #'
 #' @return a data.frame object
 #'
 #' @export
-getAnnualNormals <- function(period, variables, id, latDeg, longDeg, elevM, rcp="RCP45", climModel = "RCM4", memSize = NULL) {
-  return(getNormals(period, variables, id, latDeg, longDeg, elevM, BioSIM::allMonths, rcp, climModel, memSize))
+getAnnualNormals <- function(period, variables, id, latDeg, longDeg, elevM, rcp="RCP45", climModel = "RCM4") {
+  return(getNormals(period, variables, id, latDeg, longDeg, elevM, BioSIM::allMonths, rcp, climModel))
 }
 
 
@@ -206,39 +144,37 @@ getAnnualNormals <- function(period, variables, id, latDeg, longDeg, elevM, rcp=
 #' @param elevM the elevations of the plots (can contain some NA, in which case BioSim relies on a digital elevation model)
 #' @param rcp an representative concentration pathway (either "RCP45" or "RCP85")
 #' @param climModel a climatic model (either "RCM4", "GCM4" or "Hadley")
-#' @param memSize the size of the Java Virtual Machine (optional)
 #'
 #' @return a data.frame object
 #'
 #' @export
-getMonthlyNormals <- function(period, variables, id, latDeg, longDeg, elevM, rcp="RCP45", climModel = "RCM4", memSize = NULL) {
-  return(getNormals(period, variables, id, latDeg, longDeg, elevM, NULL, rcp, climModel, memSize))
+getMonthlyNormals <- function(period, variables, id, latDeg, longDeg, elevM, rcp="RCP45", climModel = "RCM4") {
+  return(getNormals(period, variables, id, latDeg, longDeg, elevM, NULL, rcp, climModel))
 }
 
 #'
 #' Returns the list of models available in BioSim for post weather generation processing.
-#' @param memSize the size of the Java Virtual Machine (optional)
 #'
 #' @export
-getModelList <- function(memSize = NULL) {
-  .connectToBioSIMClient(memSize)
+getModelList <- function() {
+  .connectToBioSIMClient()
   return(J4R::getAllValuesFromListObject(J4R::callJavaMethod("biosimclient.BioSimClient", "getModelList")))
 }
 
 
 .formatDataFrame <- function(listOfPlots, maps, id) {
-  latDeg <- J4R::callJavaMethod(listOfPlots, "getLatitudeDeg")
-  longDeg <- J4R::callJavaMethod(listOfPlots, "getLongitudeDeg")
-  elevM <- J4R::callJavaMethod(listOfPlots, "getElevationM")
+  latDeg <- listOfPlots$getLatitudeDeg()
+  longDeg <- listOfPlots$getLongitudeDeg()
+  elevM <- listOfPlots$getElevationM()
 
   outputDataFrame <- NULL
 
   for (i in 1:length(listOfPlots)) {
     plot <- listOfPlots[[i]]
-    if (J4R::callJavaMethod(maps, "containsKey", plot) == F) {
+    if (maps$containsKey(plot) == F) {
       stop(paste("Plot", i, "is not in the map"))
     }
-    data.i <- J4R::callJavaMethod(maps,"get", plot)
+    data.i <- maps$get(plot)
     data.i <- .convertJavaDataSetIntoDataFrame(data.i)
     data.i$id <- id[i]
     data.i$latDeg <- latDeg[i]
@@ -271,7 +207,6 @@ getModelList <- function(memSize = NULL) {
 #' @param rcp an representative concentration pathway (either "RCP45" or "RCP85")
 #' @param climModel a climatic model (either "RCM4", "GCM4" or "Hadley")
 #' @param additionalParms a named vector with the additional parameters if needed
-#' @param memSize the size of the Java Virtual Machine (optional)
 #'
 #' @return a data.frame object
 #'
@@ -284,7 +219,7 @@ getModelList <- function(memSize = NULL) {
 #'
 #'
 #' @export
-getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, isEphemeral, rep = 1, rcp = "RCP45", climModel = "RCM4", additionalParms = NULL, memSize = NULL) {
+getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, isEphemeral, rep = 1, rcp = "RCP45", climModel = "RCM4", additionalParms = NULL) {
   # For debugging
   # fromYr <- 1998
   # toYr <- 2006
@@ -294,7 +229,7 @@ getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, 
   # elevM <- locations$elevM
   # modelName <- "DegreeDay_Annual"
   # isEphemeral <- F
-  .connectToBioSIMClient(memSize)
+  .connectToBioSIMClient()
   if (length(id) != length(latDeg)) {
     stop("The arguments id, latDeg, longDeg and elevM must have the same length!")
   }
@@ -335,8 +270,8 @@ getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, 
                       jAdditionalParms)
   listOfPlots <- J4R::getAllValuesFromListObject(jPlots)
 
-  mapSize <- J4R::callJavaMethod(maps, "size")
-  listSize <- J4R::callJavaMethod(jPlots, "size")
+  mapSize <- maps$size()
+  listSize <- jPlots$size()
   if (mapSize != listSize) {
     print(paste("The map has size =", mapSize, "while the list has size =", listSize))
   }
@@ -345,40 +280,4 @@ getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, 
 
   return(outputDataFrame)
 }
-
-#'
-#' Checks whether or not the multi threading is enabled.
-#'
-#' The multi threading allows to send multiple requests simultaneously. It
-#' is handled by the back-end Java client. This method returns true if
-#' this option is enabled (which is the default value).
-#'
-#' @param memSize to set the JVM size in Mb if it is not instantiated yet. This is optional. If not specified, the JVM is instantiated with
-#' the default size.
-#' @return a logical
-#'
-#' @export
-isMultithreadingEnabled <- function(memSize = NULL) {
-  .connectToBioSIMClient(memSize)
-  return(J4R::callJavaMethod("biosimclient.BioSimClient", "isMultithreadingEnabled"))
-
-}
-
-
-#'
-#' Enables or disables the multi threading.
-#'
-#' The multi threading allows to send multiple requests simultaneously. It
-#' is handled by the back-end Java client. It is enabled by default.
-#'
-#' @param memSize to set the JVM size in Mb if it is not instantiated yet. This is optional. If not specified, the JVM is instantiated with
-#' the default size.
-#' @param enabled a logical
-#'
-#' @export
-setMultithreadingEnabled <- function(enabled, memSize = NULL) {
-  .connectToBioSIMClient(memSize)
-  J4R::callJavaMethod("biosimclient.BioSimClient", "setMultithreadingEnabled", enabled)
-}
-
 
