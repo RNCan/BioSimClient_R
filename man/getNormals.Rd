@@ -13,8 +13,7 @@ getNormals(
   elevM,
   averageOverTheseMonths,
   rcp = "RCP45",
-  climModel = "RCM4",
-  memSize = NULL
+  climModel = "RCM4"
 )
 }
 \arguments{
@@ -35,8 +34,6 @@ getNormals(
 \item{rcp}{an representative concentration pathway (either "RCP45" or "RCP85")}
 
 \item{climModel}{a climatic model (either "RCM4", "GCM4" or "Hadley")}
-
-\item{memSize}{the size of the Java Virtual Machine (optional)}
 }
 \value{
 a data.frame object

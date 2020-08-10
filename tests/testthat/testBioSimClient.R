@@ -11,6 +11,8 @@
 # twoLocationsInSouthernQuebec <- data.frame(id, latDeg, longDeg, elevM)
 # save(file = "./data/twoLocationsInSouthernQuebec.RData", twoLocationsInSouthernQuebec)
 
+library(BioSIM)
+
 multiThreadingEnabled <- isMultithreadingEnabled()
 
 test_that("Testing that multithreading is enabled by default", {
@@ -30,7 +32,9 @@ print(locations)
 
 variables <- c("TN","TX","P")
 
-normals <- getAnnualNormals("1981_2010", variables, locations$id, locations$latDeg, locations$longDeg, locations$elevM, memSize = 500)
+assign("delayDumpPileFlush", T, envir =  J4R::settingEnv)
+
+normals <- getAnnualNormals("1981_2010", variables, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation)
 
 test_that("Testing that 1981-2010 annual normals for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(normals[which(normals$id == "Quebec"),"TN"] - -0.1383562) < 1E-4, TRUE)
@@ -41,7 +45,7 @@ test_that("Testing that 1981-2010 annual normals for Quebec and Sorel can be pro
   expect_equal(abs(normals[which(normals$id == "Sorel"),"P"] - 1033.4) < 1E-4, TRUE)
 })
 
-normals <- getAnnualNormals("1971_2000", variables, locations$id, locations$latDeg, locations$longDeg, locations$elevM)
+normals <- getAnnualNormals("1971_2000", variables, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation)
 
 test_that("Testing that 1971-2000 annual normals for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(normals[which(normals$id == "Quebec"),"TN"] - -0.44) < 1E-4, TRUE)
@@ -52,7 +56,7 @@ test_that("Testing that 1971-2000 annual normals for Quebec and Sorel can be pro
   expect_equal(abs(normals[which(normals$id == "Sorel"),"P"] - 978.4) < 1E-4, TRUE)
 })
 
-normals <- getAnnualNormals("1961_1990", variables, locations$id, locations$latDeg, locations$longDeg, locations$elevM)
+normals <- getAnnualNormals("1961_1990", variables, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation)
 
 test_that("Testing that 1961-1990 annual normals for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(normals[which(normals$id == "Quebec"),"TN"] - -0.7452055) < 1E-4, TRUE)
@@ -63,7 +67,7 @@ test_that("Testing that 1961-1990 annual normals for Quebec and Sorel can be pro
   expect_equal(abs(normals[which(normals$id == "Sorel"),"P"] - 948.4) < 1E-4, TRUE)
 })
 
-normals <- getAnnualNormals("1951_1980", variables, locations$id, locations$latDeg, locations$longDeg, locations$elevM)
+normals <- getAnnualNormals("1951_1980", variables, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation)
 
 test_that("Testing that 1951-1980 annual normals for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(normals[which(normals$id == "Quebec"),"TN"] - -0.7167123) < 1E-4, TRUE)
@@ -74,7 +78,7 @@ test_that("Testing that 1951-1980 annual normals for Quebec and Sorel can be pro
   expect_equal(abs(normals[which(normals$id == "Sorel"),"P"] - 952.2) < 1E-4, TRUE)
 })
 
-summerMean <- getNormals("1981_2010", variables, locations$id, locations$latDeg, locations$longDeg, locations$elevM, c("June", "July", "August"))
+summerMean <- getNormals("1981_2010", variables, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, c("June", "July", "August"))
 
 test_that("Testing that 1981-2010 summer normals for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(summerMean[which(summerMean$id == "Quebec"),"TN"] - 12.52065) < 1E-4, TRUE)
@@ -85,7 +89,8 @@ test_that("Testing that 1981-2010 summer normals for Quebec and Sorel can be pro
   expect_equal(abs(summerMean[which(summerMean$id == "Sorel"),"P"] - 302.9) < 1E-4, TRUE)
 })
 
-normals <- getAnnualNormals("2061_2090", variables, locations$id, locations$latDeg, locations$longDeg, locations$elevM, rcp="RCP85", climModel="Hadley")
+normals <- getAnnualNormals("2061_2090", variables, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, rcp="RCP85", climModel="Hadley")
+
 test_that("Testing that 2061-2090 annual normals under RCP 8.5 and climate model Hadley for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(normals[which(normals$id == "Quebec"),"TN"] - 7.672329) < 1E-4, TRUE)
   expect_equal(abs(normals[which(normals$id == "Quebec"),"TX"] - 16.32219) < 1E-4, TRUE)
@@ -96,7 +101,7 @@ test_that("Testing that 2061-2090 annual normals under RCP 8.5 and climate model
 })
 
 
-degreeDays <- getModelOutput(1994, 2002, locations$id, locations$latDeg, locations$longDeg, locations$elevM, "DegreeDay_Annual", F)
+degreeDays <- getModelOutput(1994, 2002, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, "DegreeDay_Annual", F)
 
 test_that("Testing degree-days between 1994 and 2004 for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 1994),"DD"] - 2802.15) < 1E-4, TRUE)
@@ -119,7 +124,7 @@ test_that("Testing degree-days between 1994 and 2004 for Quebec and Sorel can be
   expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2002),"DD"] - 3232.50) < 1E-4, TRUE)
 })
 
-growingSeason <- getModelOutput(1994, 2002, locations$id, locations$latDeg, locations$longDeg, locations$elevM, "GrowingSeason", F)
+growingSeason <- getModelOutput(1994, 2002, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, "GrowingSeason", F)
 
 test_that("Testing growing season between 1994 and 2004 for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(growingSeason[which(growingSeason$id == "Quebec" & growingSeason$Year == 1994),"Length"] - 172) < 1E-4, TRUE)
@@ -142,7 +147,7 @@ test_that("Testing growing season between 1994 and 2004 for Quebec and Sorel can
   expect_equal(abs(growingSeason[which(growingSeason$id == "Sorel" & growingSeason$Year == 2002),"Length"] - 173) < 1E-4, TRUE)
 })
 
-degreeDays <- getModelOutput(2017, 2021, locations$id, locations$latDeg, locations$longDeg, locations$elevM, "DegreeDay_Annual", T, rcp = "RCP85", climModel = "GCM4")
+degreeDays <- getModelOutput(2017, 2021, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, "DegreeDay_Annual", T, rcp = "RCP85", climModel = "GCM4")
 
 test_that("Testing degree-days between 2017 and 2021 under RCP 8.5 and climate model GCM4 for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2017),"DD"] - 2840.05) < 1E-4, TRUE)
@@ -157,7 +162,7 @@ test_that("Testing degree-days between 2017 and 2021 under RCP 8.5 and climate m
   expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2021),"DD"] - 3612.30) < 1E-4, FALSE)
 })
 
-degreeDays <- getModelOutput(2017, 2018, locations$id, locations$latDeg, locations$longDeg, locations$elevM, "DegreeDay_Annual", T, additionalParms = c("LowerThreshold"=5))
+degreeDays <- getModelOutput(2017, 2018, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, "DegreeDay_Annual", T, additionalParms = c("LowerThreshold"=5))
 
 test_that("Testing degree-days above 5C in 2017 and 2018 can be properly retrieved", {
   expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2017),"DD"] - 1789.10) < 1E-4, TRUE)

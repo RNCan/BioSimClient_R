@@ -4,10 +4,7 @@
 \alias{getModelList}
 \title{Returns the list of models available in BioSim for post weather generation processing.}
 \usage{
-getModelList(memSize = NULL)
-}
-\arguments{
-\item{memSize}{the size of the Java Virtual Machine (optional)}
+getModelList()
 }
 \description{
 Returns the list of models available in BioSim for post weather generation processing.
