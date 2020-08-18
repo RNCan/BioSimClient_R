@@ -252,7 +252,7 @@ getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, 
   } else {
     jAdditionalParms <- J4R::createJavaObject("biosimclient.BioSimParameterMap")
     for (name in names(additionalParms)) {
-      J4R::callJavaMethod(jAdditionalParms, "addParameter", name, additionalParms[name])
+      jAdditionalParms$addParameter(name, additionalParms[name])
     }
   }
 
