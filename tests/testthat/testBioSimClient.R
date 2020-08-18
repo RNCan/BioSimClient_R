@@ -32,8 +32,6 @@ print(locations)
 
 variables <- c("TN","TX","P")
 
-assign("delayDumpPileFlush", T, envir =  J4R::settingEnv)
-
 normals <- getAnnualNormals("1981_2010", variables, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation)
 
 test_that("Testing that 1981-2010 annual normals for Quebec and Sorel can be properly retrieved", {
