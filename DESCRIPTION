@@ -10,7 +10,7 @@ Description: Provide a client that retrieves the climate variables from the orig
 URL: https://sourceforge.net/p/mrnfforesttools/biosimclient/wiki/Home/
 Depends: R (>= 3.4.0)
 Imports: 
-    J4R (>= 1.0.7)
+    J4R (>= 1.0.9)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
