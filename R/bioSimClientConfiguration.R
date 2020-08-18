@@ -59,34 +59,4 @@
 }
 
 
-#'
-#' Checks whether or not the multi threading is enabled.
-#'
-#' The multi threading allows to send multiple requests simultaneously. It
-#' is handled by the back-end Java client. This method returns true if
-#' this option is enabled (which is the default value).
-#'
-#' @return a logical
-#'
-#' @export
-isMultithreadingEnabled <- function() {
-  .connectToBioSIMClient()
-  return(J4R::callJavaMethod("biosimclient.BioSimClient", "isMultithreadingEnabled"))
-}
-
-
-#'
-#' Enables or disables the multi threading.
-#'
-#' The multi threading allows to send multiple requests simultaneously. It
-#' is handled by the back-end Java client. It is enabled by default.
-#'
-#' @param enabled a logical
-#'
-#' @export
-setMultithreadingEnabled <- function(enabled) {
-  .connectToBioSIMClient()
-  J4R::callJavaMethod("biosimclient.BioSimClient", "setMultithreadingEnabled", enabled)
-}
-
 

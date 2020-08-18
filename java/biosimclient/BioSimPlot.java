@@ -21,7 +21,9 @@
  */
 package biosimclient;
 
-public interface BioSimPlot {
+import java.io.Serializable;
+
+public interface BioSimPlot extends Serializable {
 
 	/**
 	 * This method returns the elevation above sea level (m).
@@ -41,5 +43,4 @@ public interface BioSimPlot {
 	 */
 	public double getLongitudeDeg();
 
-	
 }
