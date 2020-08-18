@@ -13,20 +13,6 @@
 
 library(BioSIM)
 
-multiThreadingEnabled <- isMultithreadingEnabled()
-
-test_that("Testing that multithreading is enabled by default", {
-  expect_equal(multiThreadingEnabled, TRUE)
-})
-
-setMultithreadingEnabled(FALSE)
-multiThreadingEnabled <- isMultithreadingEnabled()
-
-test_that("Testing that multithreading has been disabled for the tests", {
-  expect_equal(multiThreadingEnabled, FALSE)
-})
-
-
 locations <- BioSIM::twoLocationsInSouthernQuebec
 print(locations)
 

@@ -53,10 +53,51 @@ public final class BioSimClient {
 	private static final int MAXIMUM_NB_OBS_AT_A_TIME = 200;
 	
 	private static final String FieldSeparator = ",";
-
-
+	
 	private static final InetSocketAddress REpiceaAddress = new InetSocketAddress("repicea.dynu.net", 80);
+	private static final InetSocketAddress LocalAddress = new InetSocketAddress("192.168.0.194", 5000);
+	
+	private static final String SPACE_IN_REQUEST = "%20";
 
+	static final List<Month> AllMonths = Arrays.asList(Month.values());
+
+	private static final String NORMAL_API = "BioSimNormals";
+	private static final String GENERATOR_API = "BioSimWG";
+	private static final String MODEL_API = "BioSimModel";
+	private static final String MODEL_LIST_API = "BioSimModelList";
+	private static final String BIOSIMCLEANUP_API = "BioSimMemoryCleanUp";
+	private static final String BIOSIMMEMORYLOAD_API = "BioSimMemoryLoad";
+	private static final String BIOSIMMAXMEMORY_API = "BioSimMaxMemory";
+
+	protected static final BioSimGeneratedClimateMap GeneratedClimateMap = new BioSimGeneratedClimateMap();
+
+	private static Integer BioSimMaxMemory;
+	
+	private static List<String> ReferenceModelList;
+
+
+	static class InternalShutDownHook extends Thread {
+		@Override
+		public void run() {
+			try {
+				System.out.println("Shutdown hook from BioSimClient called!");
+				BioSimClient.removeWgoutObjectsFromServer(GeneratedClimateMap.values());
+			} catch (BioSimClientException e) {
+				e.printStackTrace();
+			} catch (BioSimServerException e2) {
+				e2.printStackTrace();
+			}
+		}
+	}
+	
+	static {
+		Runtime.getRuntime().addShutdownHook(new InternalShutDownHook());
+	}
+
+	static boolean isLocal = false;
+
+//	private static boolean MultithreadingEnabled = true; // Default value
+	
 	private final static String addQueryIfAny(String urlString, String query) {
 		if (query != null && !query.isEmpty()) {
 			return urlString.trim() + "?" + query;
@@ -66,7 +107,13 @@ public final class BioSimClient {
 	}
 
 	private final static String getStringFromConnection(String api, String query) throws BioSimClientException, BioSimServerException {
-		String urlString = "http://" + REpiceaAddress.getHostName() + ":" + REpiceaAddress.getPort() + "/" + api;
+		InetSocketAddress address;
+		if (isLocal) {
+			address = BioSimClient.LocalAddress;
+		} else {
+			address = BioSimClient.REpiceaAddress;
+		}
+		String urlString = "http://" + address.getHostName() + ":" + address.getPort() + "/" + api;
 		urlString = addQueryIfAny(urlString, query);
 		try {
 			URL bioSimURL = new URL(urlString);
@@ -101,40 +148,8 @@ public final class BioSimClient {
 		}
 	}
 
-	private static final String SPACE_IN_REQUEST = "%20";
 
-	private static final String NORMAL_API = "BioSimNormals";
-	private static final String GENERATOR_API = "BioSimWG";
-	private static final String MODEL_API = "BioSimModel";
-	private static final String MODEL_LIST_API = "BioSimModelList";
-	private static final String BIOSIMCLEANUP_API = "BioSimMemoryCleanUp";
-	private static final String BIOSIMMEMORYLOAD_API = "BioSimMemoryLoad";
 
-	protected static final BioSimGeneratedClimateMap GeneratedClimateMap = new BioSimGeneratedClimateMap();
-
-	private static List<String> ReferenceModelList;
-
-	static class InternalShutDownHook extends Thread {
-		@Override
-		public void run() {
-			try {
-				System.out.println("Shutdown hook from BioSimClient called!");
-				BioSimClient.removeWgoutObjectsFromServer(GeneratedClimateMap.values());
-			} catch (BioSimClientException e) {
-				e.printStackTrace();
-			} catch (BioSimServerException e2) {
-				e2.printStackTrace();
-			}
-		}
-	}
-	
-	static {
-		Runtime.getRuntime().addShutdownHook(new InternalShutDownHook());
-	}
-
-	static final List<Month> AllMonths = Arrays.asList(Month.values());
-
-	private static boolean MultithreadingEnabled = true; // Default value
 	
 	private static LinkedHashMap<BioSimPlot, BioSimDataSet> internalCalculationForNormals(Period period,
 			List<Variable> variables, List<BioSimPlot> locations,
@@ -183,24 +198,35 @@ public final class BioSimClient {
 		}
 	}
 
-
-	/**
-	 * Enables the multithreading when calling the getModelOutput method. By 
-	 * default the multithreading is enabled.
-	 * @param bool a boolean 
-	 */
-	public static void setMultithreadingEnabled(boolean bool) {
-		BioSimClient.MultithreadingEnabled = bool;
+	private static int getBioSimMaxMemory() {
+		if (BioSimMaxMemory == null) {
+			try {
+				BioSimMaxMemory = (int) (BioSimClient.getMaxNbWgoutObjectsOnServer() * .1);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return -1;
+			}
+		}
+		return BioSimMaxMemory;
 	}
 
-	/**
-	 * True if the multithreading is enabled (by default) or
-	 * false otherwise.
-	 * @return a boolean
-	 */
-	public static boolean isMultithreadingEnabled() {
-		return BioSimClient.MultithreadingEnabled;
-	}
+//	/**
+//	 * Enables the multithreading when calling the getModelOutput method. By 
+//	 * default the multithreading is enabled.
+//	 * @param bool a boolean 
+//	 */
+//	public static void setMultithreadingEnabled(boolean bool) {
+//		BioSimClient.MultithreadingEnabled = bool;
+//	}
+
+//	/**
+//	 * True if the multithreading is enabled (by default) or
+//	 * false otherwise.
+//	 * @return a boolean
+//	 */
+//	public static boolean isMultithreadingEnabled() {
+//		return BioSimClient.MultithreadingEnabled;
+//	}
 	
 	
 	/**
@@ -279,6 +305,15 @@ public final class BioSimClient {
 
 	protected static int getNbWgoutObjectsOnServer() throws Exception {
 		String serverReply = getStringFromConnection(BIOSIMMEMORYLOAD_API, null);
+		try {
+			return Integer.parseInt(serverReply);
+		} catch (NumberFormatException e) {
+			throw new BioSimClientException("The server reply could not be parsed: " + e.getMessage());
+		}
+	}
+
+	private static int getMaxNbWgoutObjectsOnServer() throws Exception {
+		String serverReply = getStringFromConnection(BIOSIMMAXMEMORY_API, null);
 		try {
 			return Integer.parseInt(serverReply);
 		} catch (NumberFormatException e) {
@@ -644,35 +679,35 @@ public final class BioSimClient {
 
 		Map<BioSimPlot, String> generatedClimate = new HashMap<BioSimPlot, String>();
 		if (!locationsToGenerate.isEmpty()) { // here we generate the climate if needed
-			int locationsToGenerateSize = locationsToGenerate.size();
-			int potentialNumberOfWorkers = 5; 				// TODO find an appropriate number of workers here
-			if (BioSimClient.MultithreadingEnabled && locationsToGenerateSize >= potentialNumberOfWorkers * 3) {	// otherwise singlethreading
-				BioSimWorker[] workers = new BioSimWorker[potentialNumberOfWorkers]; 
-				int nbByThreads = (int) Math.round((double) locationsToGenerateSize / potentialNumberOfWorkers); 
-				for (int i = 0; i < workers.length; i++) {
-					int from = i * nbByThreads;
-					int to = (i+1) * nbByThreads - 1;
-					if (i == workers.length - 1) {
-						to = locationsToGenerateSize - 1;
-					}
-					workers[i] = new BioSimWorker(fromYr, toYr, locationsToGenerate, rcp, climMod, rep, from, to);
-				}
-				for (int i = 0; i < workers.length; i++) {
-					try {
-						workers[i].join();
-						if (workers[i].e == null) {
-							generatedClimate.putAll(workers[i].output);
-						} else {
-							throw workers[i].e;		// FIXME there is a possibility that a thread keeps running here
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-						throw new BioSimClientException(e.getMessage());
-					} 
-				}
-			} else {
+//			int locationsToGenerateSize = locationsToGenerate.size();
+//			int potentialNumberOfWorkers = 5; 				// TODO find an appropriate number of workers here
+//			if (BioSimClient.MultithreadingEnabled && locationsToGenerateSize >= potentialNumberOfWorkers * 3) {	// otherwise singlethreading
+//				BioSimWorker[] workers = new BioSimWorker[potentialNumberOfWorkers]; 
+//				int nbByThreads = (int) Math.round((double) locationsToGenerateSize / potentialNumberOfWorkers); 
+//				for (int i = 0; i < workers.length; i++) {
+//					int from = i * nbByThreads;
+//					int to = (i+1) * nbByThreads - 1;
+//					if (i == workers.length - 1) {
+//						to = locationsToGenerateSize - 1;
+//					}
+//					workers[i] = new BioSimWorker(fromYr, toYr, locationsToGenerate, rcp, climMod, rep, from, to);
+//				}
+//				for (int i = 0; i < workers.length; i++) {
+//					try {
+//						workers[i].join();
+//						if (workers[i].e == null) {
+//							generatedClimate.putAll(workers[i].output);
+//						} else {
+//							throw workers[i].e;		// FIXME there is a possibility that a thread keeps running here
+//						}
+//					} catch (Exception e) {
+//						e.printStackTrace();
+//						throw new BioSimClientException(e.getMessage());
+//					} 
+//				}
+//			} else {
 				generatedClimate.putAll(BioSimClient.getGeneratedClimate(fromYr, toYr, locationsToGenerate, rcp, climMod, rep));
-			}
+//			}
 			
 			if (!isEphemeral) { // then we stored the reference in the static map for future use
 				for (BioSimPlot location : generatedClimate.keySet()) {
@@ -728,6 +763,14 @@ public final class BioSimClient {
 			BioSimParameterMap additionalParms) throws BioSimClientException, BioSimServerException {
 		if (rep < 1) {
 			throw new InvalidParameterException("The rep parameter should be equal to or greater than 1!");
+		} else {
+			int max = BioSimClient.getBioSimMaxMemory();
+			if (max == -1) {
+				max = MAXIMUM_NB_OBS_AT_A_TIME;
+			}
+			if (locations.size() > max) {
+				throw new BioSimClientException("The maximum number of locations for a single request is " + max);
+			}
 		}
 		if (locations.size() > MAXIMUM_NB_OBS_AT_A_TIME) {
 			LinkedHashMap<BioSimPlot, BioSimDataSet> resultingMap = new LinkedHashMap<BioSimPlot, BioSimDataSet>();
