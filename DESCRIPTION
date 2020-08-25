@@ -8,7 +8,7 @@ Copyright: Her Majesty the Queen in right of Canada
 Description: Provide a client that retrieves the climate variables from the original 'BioSIM' application
    hosted on a server. The 'BioSIM' application is being developed by the Canadian Forest Service.
 URL: https://sourceforge.net/p/mrnfforesttools/biosimclient/wiki/Home/
-Depends: R (>= 3.4.0)
+Depends: R (>= 3.5.0)
 Imports: 
     J4R (>= 1.0.9)
 License: GPL-3
