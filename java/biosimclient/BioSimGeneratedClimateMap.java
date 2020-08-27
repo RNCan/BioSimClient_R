@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 class BioSimGeneratedClimateMap extends ConcurrentHashMap<BioSimQuerySignature, String> {
 
-	final ConcurrentHashMap<String, BioSimQuerySignature> sisterMap; 
+	private final ConcurrentHashMap<String, BioSimQuerySignature> sisterMap; 
 	
 	BioSimGeneratedClimateMap() {
 		sisterMap = new ConcurrentHashMap<String, BioSimQuerySignature>();
@@ -38,7 +38,7 @@ class BioSimGeneratedClimateMap extends ConcurrentHashMap<BioSimQuerySignature, 
 
 	@Override
 	public String put(BioSimQuerySignature signature, String reference) {
-		if (contains(signature)) {
+		if (containsValue(signature)) {
 			sisterMap.remove(get(signature));	// we first remove the entry in the sister map if it exists
 		}
 		super.put(signature, reference);
@@ -47,7 +47,7 @@ class BioSimGeneratedClimateMap extends ConcurrentHashMap<BioSimQuerySignature, 
 	}
 	
 	void removeValue(String reference) {
-		if (sisterMap.contains(reference)) {
+		if (sisterMap.containsKey(reference)) {
 			BioSimQuerySignature signature = sisterMap.get(reference);
 			remove(signature);
 			sisterMap.remove(reference);
