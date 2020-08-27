@@ -2,7 +2,7 @@
 % Please edit documentation in R/bioSimClientFunctions.R
 \name{getModelOutput}
 \alias{getModelOutput}
-\title{Generates the climate for particular locations and applies a model on this generated climate.}
+\title{Generate climate and apply a model.}
 \usage{
 getModelOutput(
   fromYr,
@@ -49,14 +49,16 @@ computational burden and inconsistencies if different models are applied on the 
 a data.frame object
 }
 \description{
-Generates the climate for particular locations and applies a model on this generated climate.
+This function generated the basic climate variables for some locations
+and applies a particular model on this generated climate.
 }
 \examples{
 
 locations <- BioSIM::twoLocationsInSouthernQuebec
-# degreeDays <- getClimateVariables(2017, 2021, locations$id, locations$latDeg,
-#                                locations$longDeg, locations$elevM, "DegreeDay_Annual",
-#                                F, rcp = "RCP85", climModel = "GCM4") ## not run
-
+addParms <- c("LowerThreshold"=5)
+\dontrun{
+degreeDays <- getModelOutput(2017, 2021, locations$Name, locations$Latitude,
+                             locations$Longitude, locations$Elevation, "DegreeDay_Annual",
+                             F, rcp = "RCP85", climModel = "GCM4", additionalParms = addParms)}
 
 }

@@ -38,3 +38,12 @@ a data.frame object
 \description{
 Return the monthly normals for a period
 }
+\examples{
+
+locations <- BioSIM::twoLocationsInSouthernQuebec
+variables <- c("TN","TX","P")
+\dontrun{
+monthlyMeans <- getMonthlyNormals("1981_2010", variables, locations$Name, locations$Latitude,
+                                   locations$Longitude, locations$Elevation)}
+
+}

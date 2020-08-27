@@ -67,9 +67,10 @@ allMonths <- c("January", "February", "March", "April", "May", "June", "July", "
 #'
 #' locations <- BioSIM::twoLocationsInSouthernQuebec
 #' variables <- c("TN","TX","P")
-#' # summerMean <- getNormals("1981_2010", variables, locations$id, locations$latDeg,
-#' #                        locations$longDeg, locations$elevM,
-#' #                        c("June", "July", "August")) ## not run
+#' \dontrun{
+#' summerMean <- getNormals("1981_2010", variables, locations$Name, locations$Latitude,
+#'                           locations$Longitude, locations$Elevation,
+#'                           c("June", "July", "August"))}
 #'
 #' @export
 getNormals <- function(period, variables, id, latDeg, longDeg, elevM, averageOverTheseMonths, rcp="RCP45", climModel = "RCM4") {
@@ -127,6 +128,14 @@ getNormals <- function(period, variables, id, latDeg, longDeg, elevM, averageOve
 #'
 #' @return a data.frame object
 #'
+#' @examples
+#'
+#' locations <- BioSIM::twoLocationsInSouthernQuebec
+#' variables <- c("TN","TX","P")
+#' \dontrun{
+#' annualNormals <- getAnnualNormals("1981_2010", variables, locations$Name, locations$Latitude,
+#'                                      locations$Longitude, locations$Elevation)}
+#'
 #' @export
 getAnnualNormals <- function(period, variables, id, latDeg, longDeg, elevM, rcp="RCP45", climModel = "RCM4") {
   return(getNormals(period, variables, id, latDeg, longDeg, elevM, BioSIM::allMonths, rcp, climModel))
@@ -147,13 +156,29 @@ getAnnualNormals <- function(period, variables, id, latDeg, longDeg, elevM, rcp=
 #'
 #' @return a data.frame object
 #'
+#' @examples
+#'
+#' locations <- BioSIM::twoLocationsInSouthernQuebec
+#' variables <- c("TN","TX","P")
+#' \dontrun{
+#' monthlyMeans <- getMonthlyNormals("1981_2010", variables, locations$Name, locations$Latitude,
+#'                                    locations$Longitude, locations$Elevation)}
+#'
 #' @export
 getMonthlyNormals <- function(period, variables, id, latDeg, longDeg, elevM, rcp="RCP45", climModel = "RCM4") {
   return(getNormals(period, variables, id, latDeg, longDeg, elevM, NULL, rcp, climModel))
 }
 
 #'
-#' Returns the list of models available in BioSim for post weather generation processing.
+#' Return the list of models available in BioSim
+#'
+#' Provide the list of model that can be used in BioSIM after generating
+#' the climate for some locations.
+#'
+#' @examples
+#'
+#' \dontrun{
+#' getModelList()}
 #'
 #' @export
 getModelList <- function() {
@@ -192,7 +217,10 @@ getModelList <- function() {
 
 
 #'
-#' Generates the climate for particular locations and applies a model on this generated climate.
+#' Generate climate and apply a model.
+#'
+#' This function generated the basic climate variables for some locations
+#' and applies a particular model on this generated climate.
 #'
 #' @param fromYr the starting date (yr) of the period (inclusive)
 #' @param toYr the ending date (yr) of the period (inclusive)
@@ -213,10 +241,11 @@ getModelList <- function() {
 #' @examples
 #'
 #' locations <- BioSIM::twoLocationsInSouthernQuebec
-#' # degreeDays <- getClimateVariables(2017, 2021, locations$id, locations$latDeg,
-#' #                                locations$longDeg, locations$elevM, "DegreeDay_Annual",
-#' #                                F, rcp = "RCP85", climModel = "GCM4") ## not run
-#'
+#' addParms <- c("LowerThreshold"=5)
+#' \dontrun{
+#' degreeDays <- getModelOutput(2017, 2021, locations$Name, locations$Latitude,
+#'                              locations$Longitude, locations$Elevation, "DegreeDay_Annual",
+#'                              F, rcp = "RCP85", climModel = "GCM4", additionalParms = addParms)}
 #'
 #' @export
 getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, isEphemeral, rep = 1, rcp = "RCP45", climModel = "RCM4", additionalParms = NULL) {
@@ -240,10 +269,6 @@ getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, 
       stop("The names in the named vector must be unique!")
     }
   }
-#  listOfModels <- getModelList()
-#  if (!(modelName %in% listOfModels)) {
-#    stop(paste("The model", modelName, "is not recognized by BioSim. Please see the list of available models. Call the getModelList() function."))
-#  }
   jPlots <- .createBioSimPlots(latDeg, longDeg, elevM)
   jRCP <- J4R::createJavaObject("biosimclient.BioSimEnums$RCP", rcp)
   jClimModel <- J4R::createJavaObject("biosimclient.BioSimEnums$ClimateModel", climModel)
@@ -294,8 +319,8 @@ getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, 
 #' @examples
 #'
 #' \dontrun{
-#' clearCache()
-#' }
+#' clearCache()}
+#'
 #' @export
 clearCache <- function() {
   J4R::callJavaMethod("biosimclient.BioSimClient", "clearCache")

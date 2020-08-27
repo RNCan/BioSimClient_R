@@ -16,6 +16,6 @@ clears this cache on both the server and the client ends.
 \examples{
 
 \dontrun{
-clearCache()
-}
+clearCache()}
+
 }

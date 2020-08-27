@@ -7,7 +7,7 @@ Maintainer: Mathieu Fortin <mathieu.fortin.re@gmail.com>
 Copyright: Her Majesty the Queen in right of Canada
 Description: Provide a client that retrieves the climate variables from the original 'BioSIM' application
    hosted on a server. The 'BioSIM' application is being developed by the Canadian Forest Service.
-URL: https://sourceforge.net/p/mrnfforesttools/biosimclient/wiki/Home/
+URL: https://sourceforge.net/p/mrnfforesttools/biosimclient/wiki/BioSIM-R/
 Depends: R (>= 3.5.0)
 Imports: 
     J4R (>= 1.0.9)

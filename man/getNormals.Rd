@@ -46,8 +46,9 @@ this argument is filled with some months, then the normal are aggregated over th
 
 locations <- BioSIM::twoLocationsInSouthernQuebec
 variables <- c("TN","TX","P")
-# summerMean <- getNormals("1981_2010", variables, locations$id, locations$latDeg,
-#                        locations$longDeg, locations$elevM,
-#                        c("June", "July", "August")) ## not run
+\dontrun{
+summerMean <- getNormals("1981_2010", variables, locations$Name, locations$Latitude,
+                          locations$Longitude, locations$Elevation,
+                          c("June", "July", "August"))}
 
 }
