@@ -33,9 +33,7 @@ addParms <- c("LowerThreshold"=5)
 degreeDays <- getModelOutput(2017, 2021, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, "DegreeDay_Annual", F, rcp = "RCP85", climModel = "GCM4", additionalParms = addParms)
 degreeDays
 
-clearCache()
-
-J4R::shutdownJava()
+shutdownJava()
 
 
 

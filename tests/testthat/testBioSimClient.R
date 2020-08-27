@@ -155,7 +155,7 @@ test_that("Testing degree-days above 5C in 2017 and 2018 can be properly retriev
   expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2018),"DD"] - 2390.85) < 1E-4, TRUE)
 })
 
-J4R::shutdownJava()
+shutdownJava()
 
 
 

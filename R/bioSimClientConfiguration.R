@@ -58,5 +58,24 @@
   .loadBioSIMClient()
 }
 
+#'
+#' Shut down the Java server
+#'
+#' This method overrides the original function of the J4R package. It only adds
+#' a call to the clearCache function before calling the original function of
+#' the J4R package.
+#'
+#' @examples
+#' \dontrun{
+#' shutdownJava()}
+#'
+#' @export
+shutdownJava <- function() {
+  if (J4R::isConnectedToJava() && J4R::checkIfClasspathContains("biosimclient.jar")) {
+    message("Clearing out the client cache. This may take a while...")
+    clearCache()
+  }
+  J4R::shutdownJava()
+}
 
 

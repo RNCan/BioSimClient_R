@@ -2,10 +2,17 @@
 % Please edit documentation in R/bioSimClientFunctions.R
 \name{getModelList}
 \alias{getModelList}
-\title{Returns the list of models available in BioSim for post weather generation processing.}
+\title{Return the list of models available in BioSim}
 \usage{
 getModelList()
 }
 \description{
-Returns the list of models available in BioSim for post weather generation processing.
+Provide the list of model that can be used in BioSIM after generating
+the climate for some locations.
+}
+\examples{
+
+\dontrun{
+getModelList()}
+
 }
