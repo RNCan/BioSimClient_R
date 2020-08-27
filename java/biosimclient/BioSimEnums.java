@@ -24,7 +24,13 @@ package biosimclient;
 public class BioSimEnums {
 	
 	public static enum RCP {
+		/**
+		 * RCP 4.5 (default RCP)
+		 */
 		RCP45("4_5"),
+		/**
+		 * RCP 8.5
+		 */
 		RCP85("8_5");
 		
 		private final String urlString;
@@ -38,8 +44,17 @@ public class BioSimEnums {
 	}
 	
 	public static enum ClimateModel {
+		/**
+		 * Hadley climate model
+		 */
 		Hadley,
-		RCM4,
+		/**
+		 * RCM 4 climate model (default climate model)
+		 */
+		RCM4, 
+		/**
+		 * GCM 4 climate model
+		 */
 		GCM4;
 	}
 

@@ -281,3 +281,22 @@ getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, 
   return(outputDataFrame)
 }
 
+
+#'
+#' Clear the cache of the client
+#'
+#' When using the weather generator, some objects are stored in memory on the server and
+#' a reference is stored in the client, so that subsequent calls on models for the same
+#' location and time interval does not have to generate the climate over and over again.
+#' After a while it may happen that a large number of objects are kept in memory. This method
+#' clears this cache on both the server and the client ends.
+#'
+#' @examples
+#'
+#' \dontrun{
+#' clearCache()
+#' }
+#' @export
+clearCache <- function() {
+  J4R::callJavaMethod("biosimclient.BioSimClient", "clearCache")
+}

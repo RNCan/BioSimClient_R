@@ -50,7 +50,10 @@ import biosimclient.BioSimEnums.Variable;
  */
 public final class BioSimClient {
 
-	private static final int MAXIMUM_NB_OBS_AT_A_TIME = 200;
+	private static final int MAXIMUM_NB_LOCATIONS_PER_BATCH_WEATHER_GENERATION = 10;
+	private static final int MAXIMUM_NB_LOCATIONS_PER_BATCH_NORMALS = 50;
+	private static final int MAXIMUM_NB_LOCATIONS_PER_BATCH_REMOVALS = 200;
+	private static int MAXIMUM_NB_LOCATIONS_IN_A_SINGLE_REQUEST = -1; // not set yet
 	
 	private static final String FieldSeparator = ",";
 	
@@ -71,7 +74,7 @@ public final class BioSimClient {
 
 	protected static final BioSimGeneratedClimateMap GeneratedClimateMap = new BioSimGeneratedClimateMap();
 
-	private static Integer BioSimMaxMemory;
+//	private static Integer BioSimMaxMemory;
 	
 	private static List<String> ReferenceModelList;
 
@@ -80,8 +83,10 @@ public final class BioSimClient {
 		@Override
 		public void run() {
 			try {
-				System.out.println("Shutdown hook from BioSimClient called!");
-				BioSimClient.removeWgoutObjectsFromServer(GeneratedClimateMap.values());
+				if (!GeneratedClimateMap.isEmpty()) {
+					System.out.println("Shutdown hook from BioSimClient called!");
+					BioSimClient.clearCache();
+				}
 			} catch (BioSimClientException e) {
 				e.printStackTrace();
 			} catch (BioSimServerException e2) {
@@ -198,36 +203,27 @@ public final class BioSimClient {
 		}
 	}
 
-	private static int getBioSimMaxMemory() {
-		if (BioSimMaxMemory == null) {
+	private static synchronized int getMaxNumberLocationsInSingleRequest() {
+		if (MAXIMUM_NB_LOCATIONS_IN_A_SINGLE_REQUEST == -1) { // true when called for the first time
 			try {
-				BioSimMaxMemory = (int) (BioSimClient.getMaxNbWgoutObjectsOnServer() * .1);
+				MAXIMUM_NB_LOCATIONS_IN_A_SINGLE_REQUEST = (int) (BioSimClient.getMaxNbWgoutObjectsOnServer() * .05);
 			} catch (Exception e) {
-				e.printStackTrace();
-				return -1;
+				MAXIMUM_NB_LOCATIONS_IN_A_SINGLE_REQUEST = 1000;
 			}
 		}
-		return BioSimMaxMemory;
+		return MAXIMUM_NB_LOCATIONS_IN_A_SINGLE_REQUEST;
 	}
 
-//	/**
-//	 * Enables the multithreading when calling the getModelOutput method. By 
-//	 * default the multithreading is enabled.
-//	 * @param bool a boolean 
-//	 */
-//	public static void setMultithreadingEnabled(boolean bool) {
-//		BioSimClient.MultithreadingEnabled = bool;
-//	}
-
-//	/**
-//	 * True if the multithreading is enabled (by default) or
-//	 * false otherwise.
-//	 * @return a boolean
-//	 */
-//	public static boolean isMultithreadingEnabled() {
-//		return BioSimClient.MultithreadingEnabled;
-//	}
-	
+	/**
+	 * This method clears the reference to the teleIO objects that are stored in the internal map.
+	 * @throws BioSimClientException
+	 * @throws BioSimServerException
+	 */
+	public static void clearCache() throws BioSimClientException, BioSimServerException {
+		if (!GeneratedClimateMap.isEmpty()) {
+			BioSimClient.removeWgoutObjectsFromServer(GeneratedClimateMap.values());
+		}
+	}
 	
 	/**
 	 * Retrieves the normals and compiles the mean or sum over some months.
@@ -249,13 +245,16 @@ public final class BioSimClient {
 			RCP rcp,
 			ClimateModel climModel,
 			List<Month> averageOverTheseMonths) throws BioSimClientException, BioSimServerException {
-		if (locations.size() > MAXIMUM_NB_OBS_AT_A_TIME) {
+		if (locations.size() > BioSimClient.getMaxNumberLocationsInSingleRequest()) {
+			throw new BioSimClientException("The maximum number of locations for a single request is " + MAXIMUM_NB_LOCATIONS_IN_A_SINGLE_REQUEST);
+		}
+		if (locations.size() > MAXIMUM_NB_LOCATIONS_PER_BATCH_NORMALS) {
 			LinkedHashMap<BioSimPlot, BioSimDataSet> resultingMap = new LinkedHashMap<BioSimPlot, BioSimDataSet>();
 			List<BioSimPlot> copyList = new ArrayList<BioSimPlot>();
 			copyList.addAll(locations);
 			List<BioSimPlot> subList = new ArrayList<BioSimPlot>();
 			while (!copyList.isEmpty()) {
-				while (!copyList.isEmpty() && subList.size() < MAXIMUM_NB_OBS_AT_A_TIME) {
+				while (!copyList.isEmpty() && subList.size() < MAXIMUM_NB_LOCATIONS_PER_BATCH_NORMALS) {
 					subList.add(copyList.remove(0));
 				}
 				resultingMap.putAll(internalCalculationForNormals(period, variables, subList, rcp, climModel, averageOverTheseMonths));
@@ -269,12 +268,12 @@ public final class BioSimClient {
 
 	protected static void removeWgoutObjectsFromServer(Collection<String> references) 
 			throws BioSimClientException, BioSimServerException {
-		if (references.size() > MAXIMUM_NB_OBS_AT_A_TIME) {
+		if (references.size() > MAXIMUM_NB_LOCATIONS_PER_BATCH_REMOVALS) {
 			List<String> referenceList = new ArrayList<String>();
 			referenceList.addAll(references);
 			List<String> subList = new ArrayList<String>();
 			while (!referenceList.isEmpty()) {
-				while (!referenceList.isEmpty() && subList.size() < MAXIMUM_NB_OBS_AT_A_TIME) {
+				while (!referenceList.isEmpty() && subList.size() < MAXIMUM_NB_LOCATIONS_PER_BATCH_REMOVALS) {
 					subList.add(referenceList.remove(0));
 				}
 				internalRemovalOfWgoutObjectsFromServer(subList);
@@ -312,6 +311,10 @@ public final class BioSimClient {
 		}
 	}
 
+	/**
+	 * The maximum number of wgouts instances that can be stored in the internal map of the server.
+	 * @return
+	 */
 	private static int getMaxNbWgoutObjectsOnServer() throws Exception {
 		String serverReply = getStringFromConnection(BIOSIMMAXMEMORY_API, null);
 		try {
@@ -404,6 +407,8 @@ public final class BioSimClient {
 	 * @param fromYr    beginning of the interval (inclusive)
 	 * @param toYr      end of the interval (inclusive)
 	 * @param locations a List of BioSimPlot instances
+	 * @param rcp an RCP enum variable (by default RCP 4.5)
+	 * @param climModel a ClimateModel enum variable (by default RCM 4)
 	 * @return a LinkedHashMap with BioSimPlot instances as key
 	 *         and String instances as values. Those strings are actually the code
 	 *         for the TeleIO instance on the server.
@@ -603,6 +608,8 @@ public final class BioSimClient {
 	 * @param toYr ending date (yr) of the period (inclusive)
 	 * @param locations the locations of the plots (BioSimPlot instances)
 	 * @param modelName a string representing the model name
+	 * @param rcp an RCP enum variable (by default RCP 4.5)
+	 * @param climModel a ClimateModel enum variable (by default RCM 4)
 	 * @param rep the number of replicates if needed. Should be equal to or greater than 1. 
 	 * @param additionalParms a BioSimParameterMap instance that contains the eventual additional parameters for the model
 	 * @return a LinkedHashMap of BioSimPlot instances (keys) and climate variables (values)
@@ -633,6 +640,8 @@ public final class BioSimClient {
 	 * @param fromYr starting date (yr) of the period (inclusive)
 	 * @param toYr ending date (yr) of the period (inclusive)
 	 * @param locations the locations of the plots (BioSimPlot instances)
+	 * @param rcp an RCP enum variable (by default RCP 4.5)
+	 * @param climModel a ClimateModel enum variable (by default RCM 4)
 	 * @param modelName a string representing the model name
 	 * @param additionalParms a BioSimParameterMap instance that contains the eventual additional parameters for the model
 	 * @return a LinkedHashMap of BioSimPlot instances (keys) and climate variables (values)
@@ -679,35 +688,7 @@ public final class BioSimClient {
 
 		Map<BioSimPlot, String> generatedClimate = new HashMap<BioSimPlot, String>();
 		if (!locationsToGenerate.isEmpty()) { // here we generate the climate if needed
-//			int locationsToGenerateSize = locationsToGenerate.size();
-//			int potentialNumberOfWorkers = 5; 				// TODO find an appropriate number of workers here
-//			if (BioSimClient.MultithreadingEnabled && locationsToGenerateSize >= potentialNumberOfWorkers * 3) {	// otherwise singlethreading
-//				BioSimWorker[] workers = new BioSimWorker[potentialNumberOfWorkers]; 
-//				int nbByThreads = (int) Math.round((double) locationsToGenerateSize / potentialNumberOfWorkers); 
-//				for (int i = 0; i < workers.length; i++) {
-//					int from = i * nbByThreads;
-//					int to = (i+1) * nbByThreads - 1;
-//					if (i == workers.length - 1) {
-//						to = locationsToGenerateSize - 1;
-//					}
-//					workers[i] = new BioSimWorker(fromYr, toYr, locationsToGenerate, rcp, climMod, rep, from, to);
-//				}
-//				for (int i = 0; i < workers.length; i++) {
-//					try {
-//						workers[i].join();
-//						if (workers[i].e == null) {
-//							generatedClimate.putAll(workers[i].output);
-//						} else {
-//							throw workers[i].e;		// FIXME there is a possibility that a thread keeps running here
-//						}
-//					} catch (Exception e) {
-//						e.printStackTrace();
-//						throw new BioSimClientException(e.getMessage());
-//					} 
-//				}
-//			} else {
-				generatedClimate.putAll(BioSimClient.getGeneratedClimate(fromYr, toYr, locationsToGenerate, rcp, climMod, rep));
-//			}
+			generatedClimate.putAll(BioSimClient.getGeneratedClimate(fromYr, toYr, locationsToGenerate, rcp, climMod, rep));
 			
 			if (!isEphemeral) { // then we stored the reference in the static map for future use
 				for (BioSimPlot location : generatedClimate.keySet()) {
@@ -745,6 +726,8 @@ public final class BioSimClient {
 	 * @param fromYr starting date (yr) of the period (inclusive)
 	 * @param toYr ending date (yr) of the period (inclusive)
 	 * @param locations the locations of the plots (BioSimPlot instances)
+	 * @param rcp an RCP enum variable (by default RCP 4.5)
+	 * @param climModel a ClimateModel enum variable (by default RCM 4)
 	 * @param modelName a string representing the model name
 	 * @param rep the number of replicates if needed. Should be equal to or greater than 1. 
 	 * @param isEphemeral a boolean that overrides the storage procedure on the server
@@ -763,22 +746,17 @@ public final class BioSimClient {
 			BioSimParameterMap additionalParms) throws BioSimClientException, BioSimServerException {
 		if (rep < 1) {
 			throw new InvalidParameterException("The rep parameter should be equal to or greater than 1!");
-		} else {
-			int max = BioSimClient.getBioSimMaxMemory();
-			if (max == -1) {
-				max = MAXIMUM_NB_OBS_AT_A_TIME;
-			}
-			if (locations.size() > max) {
-				throw new BioSimClientException("The maximum number of locations for a single request is " + max);
-			}
+		} 
+		if (locations.size() > BioSimClient.getMaxNumberLocationsInSingleRequest()) {
+			throw new BioSimClientException("The maximum number of locations for a single request is " + MAXIMUM_NB_LOCATIONS_IN_A_SINGLE_REQUEST);
 		}
-		if (locations.size() > MAXIMUM_NB_OBS_AT_A_TIME) {
+		if (locations.size() > MAXIMUM_NB_LOCATIONS_PER_BATCH_WEATHER_GENERATION) {
 			LinkedHashMap<BioSimPlot, BioSimDataSet> resultingMap = new LinkedHashMap<BioSimPlot, BioSimDataSet>();
 			List<BioSimPlot> copyList = new ArrayList<BioSimPlot>();
 			copyList.addAll(locations);
 			List<BioSimPlot> subList = new ArrayList<BioSimPlot>();
 			while (!copyList.isEmpty()) {
-				while (!copyList.isEmpty() && subList.size() < MAXIMUM_NB_OBS_AT_A_TIME) {
+				while (!copyList.isEmpty() && subList.size() < MAXIMUM_NB_LOCATIONS_PER_BATCH_WEATHER_GENERATION) {
 					subList.add(copyList.remove(0));
 				}
 				resultingMap.putAll(internalCalculationForClimateVariables(fromYr, toYr, subList, rcp, climMod, modelName, rep, isEphemeral, additionalParms));
@@ -805,6 +783,8 @@ public final class BioSimClient {
 	 * @param fromYr starting date (yr) of the period (inclusive)
 	 * @param toYr ending date (yr) of the period (inclusive)
 	 * @param locations the locations of the plots (BioSimPlot instances)
+	 * @param rcp an RCP enum variable (by default RCP 4.5)
+	 * @param climModel a ClimateModel enum variable (by default RCM 4)
 	 * @param modelName a string representing the model name
 	 * @param isEphemeral a boolean that overrides the storage procedure on the server
 	 * @param additionalParms a BioSimParameterMap instance that contains the eventual additional parameters for the model
