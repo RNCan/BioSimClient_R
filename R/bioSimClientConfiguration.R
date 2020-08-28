@@ -71,10 +71,15 @@
 #'
 #' @export
 shutdownJava <- function() {
-  if (J4R::isConnectedToJava() && J4R::checkIfClasspathContains("biosimclient.jar")) {
-    message("Clearing out the client cache. This may take a while...")
-    clearCache()
-  }
+  tryCatch ({
+    if (J4R::isConnectedToJava() && J4R::checkIfClasspathContains("biosimclient.jar")) {
+      message("Clearing out the client cache. This may take a while...")
+      clearCache()
+    }
+  },
+  error = function(cond) {
+    message("An error occurred while attempting to clear the cache!")
+  })
   J4R::shutdownJava()
 }
 
