@@ -135,22 +135,22 @@ degreeDays <- getModelOutput(2017, 2021, locations$Name, locations$Latitude, loc
 
 test_that("Testing degree-days between 2017 and 2021 under RCP 8.5 and climate model GCM4 for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2017),"DD"] - 2840.05) < 1E-4, TRUE)
-  expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2018),"DD"] - 2740.50) < 1E-4, TRUE)
-  expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2019),"DD"] - 2703.95) < 1E-4, FALSE)
-  expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2020),"DD"] - 3064.90) < 1E-4, FALSE)
-  expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2021),"DD"] - 3216.00) < 1E-4, FALSE)
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2018),"DD"] - 2731.65) < 1E-4, TRUE)
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2019),"DD"] - 2600.45) < 1E-4, TRUE)
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2020),"DD"] - 2836.65) < 1E-4, FALSE)
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2021),"DD"] - 3191.80) < 1E-4, FALSE)
   expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2017),"DD"] - 3552.60) < 1E-4, TRUE)
   expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2018),"DD"] - 3454.60) < 1E-4, TRUE)
-  expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2019),"DD"] - 3233.45) < 1E-4, FALSE)
-  expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2020),"DD"] - 3361.55) < 1E-4, FALSE)
-  expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2021),"DD"] - 3612.30) < 1E-4, FALSE)
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2019),"DD"] - 3283.70) < 1E-4, TRUE)
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2020),"DD"] - 3537.10) < 1E-4, FALSE)
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2021),"DD"] - 3479.20) < 1E-4, FALSE)
 })
 
 degreeDays <- getModelOutput(2017, 2018, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, "DegreeDay_Annual", T, additionalParms = c("LowerThreshold"=5))
 
 test_that("Testing degree-days above 5C in 2017 and 2018 can be properly retrieved", {
   expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2017),"DD"] - 1789.10) < 1E-4, TRUE)
-  expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2018),"DD"] - 1781.80) < 1E-4, TRUE)
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2018),"DD"] - 1774.20) < 1E-4, TRUE)
   expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2017),"DD"] - 2396.45) < 1E-4, TRUE)
   expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2018),"DD"] - 2390.85) < 1E-4, TRUE)
 })
