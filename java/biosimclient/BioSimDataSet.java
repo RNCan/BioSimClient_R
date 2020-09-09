@@ -28,7 +28,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import biosimclient.BioSimEnums.Month;
-import biosimclient.BioSimEnums.Variable;
 
 /**
  * Handles the server replies. This class derived from DataSet includes
@@ -247,9 +246,19 @@ public class BioSimDataSet implements Serializable {
 		return outputMap;
 	}
 	
-	final BioSimDataSet getMonthDataSet(List<Month> months, List<Variable> variables) throws BioSimClientException {
+	
+	void removeField(int fieldId) {
+		for (Observation obs : getObservations()) {
+			obs.values.remove(fieldId);
+		}
+		fieldTypes.remove(fieldId);
+		fieldNames.remove(fieldId);
+	}
+	
+	
+	final BioSimDataSet getMonthDataSet(List<Month> months) throws BioSimClientException {
 		BioSimMonthMap monthMap = new BioSimMonthMap(this);
-		return monthMap.getMeanForTheseMonths(months, variables);
+		return monthMap.getMeanForTheseMonths(months);
 	}
 
 }
