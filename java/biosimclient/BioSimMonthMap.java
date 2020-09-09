@@ -60,12 +60,12 @@ class BioSimMonthMap extends LinkedHashMap<Month, Map<Variable, Double>> {
 	}
 	
 	
-	final BioSimDataSet getMeanForTheseMonths(List<Month> months, List<Variable> variables) throws BioSimClientException {
+	final BioSimDataSet getMeanForTheseMonths(List<Month> months) throws BioSimClientException {
 		Map<Variable, Double> outputMap = new LinkedHashMap<Variable, Double>();
 		int nbDays = 0;
 		for (Month month : months) {
 			if (containsKey(month)) {
-				for (Variable var : variables) {
+				for (Variable var : Variable.values()) {
 					if (get(month).containsKey(var)) {
 						double value = get(month).get(var);
 						if (!var.isAdditive()) {
@@ -80,11 +80,11 @@ class BioSimMonthMap extends LinkedHashMap<Month, Map<Variable, Double>> {
 					}
 				}
 			} else {
-				throw new BioSimClientException("The month " + month.name() + " is not in the MonthMap instance!");
+				throw new BioSimClientException("The )month " + month.name() + " is not in the MonthMap instance!");
 			}
 			nbDays += month.nbDays;
 		}
-		for (Variable var : variables) {
+		for (Variable var : Variable.values()) {
 			if (!var.additive) {
 				outputMap.put(var, outputMap.get(var) / nbDays);
 			}

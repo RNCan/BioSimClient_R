@@ -16,9 +16,7 @@ library(BioSIM)
 locations <- BioSIM::twoLocationsInSouthernQuebec
 print(locations)
 
-variables <- c("TN","TX","P")
-
-normals <- getAnnualNormals("1981_2010", variables, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation)
+normals <- getAnnualNormals("1981_2010", locations$Name, locations$Latitude, locations$Longitude, locations$Elevation)
 
 test_that("Testing that 1981-2010 annual normals for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(normals[which(normals$id == "Quebec"),"TN"] - -0.1383562) < 1E-4, TRUE)
@@ -29,7 +27,7 @@ test_that("Testing that 1981-2010 annual normals for Quebec and Sorel can be pro
   expect_equal(abs(normals[which(normals$id == "Sorel"),"P"] - 1033.4) < 1E-4, TRUE)
 })
 
-normals <- getAnnualNormals("1971_2000", variables, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation)
+normals <- getAnnualNormals("1971_2000", locations$Name, locations$Latitude, locations$Longitude, locations$Elevation)
 
 test_that("Testing that 1971-2000 annual normals for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(normals[which(normals$id == "Quebec"),"TN"] - -0.44) < 1E-4, TRUE)
@@ -40,7 +38,7 @@ test_that("Testing that 1971-2000 annual normals for Quebec and Sorel can be pro
   expect_equal(abs(normals[which(normals$id == "Sorel"),"P"] - 978.4) < 1E-4, TRUE)
 })
 
-normals <- getAnnualNormals("1961_1990", variables, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation)
+normals <- getAnnualNormals("1961_1990", locations$Name, locations$Latitude, locations$Longitude, locations$Elevation)
 
 test_that("Testing that 1961-1990 annual normals for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(normals[which(normals$id == "Quebec"),"TN"] - -0.7452055) < 1E-4, TRUE)
@@ -51,7 +49,7 @@ test_that("Testing that 1961-1990 annual normals for Quebec and Sorel can be pro
   expect_equal(abs(normals[which(normals$id == "Sorel"),"P"] - 948.4) < 1E-4, TRUE)
 })
 
-normals <- getAnnualNormals("1951_1980", variables, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation)
+normals <- getAnnualNormals("1951_1980", locations$Name, locations$Latitude, locations$Longitude, locations$Elevation)
 
 test_that("Testing that 1951-1980 annual normals for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(normals[which(normals$id == "Quebec"),"TN"] - -0.7167123) < 1E-4, TRUE)
@@ -62,7 +60,7 @@ test_that("Testing that 1951-1980 annual normals for Quebec and Sorel can be pro
   expect_equal(abs(normals[which(normals$id == "Sorel"),"P"] - 952.2) < 1E-4, TRUE)
 })
 
-summerMean <- getNormals("1981_2010", variables, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, c("June", "July", "August"))
+summerMean <- getNormals("1981_2010", locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, c("June", "July", "August"))
 
 test_that("Testing that 1981-2010 summer normals for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(summerMean[which(summerMean$id == "Quebec"),"TN"] - 12.52065) < 1E-4, TRUE)
@@ -73,7 +71,7 @@ test_that("Testing that 1981-2010 summer normals for Quebec and Sorel can be pro
   expect_equal(abs(summerMean[which(summerMean$id == "Sorel"),"P"] - 302.9) < 1E-4, TRUE)
 })
 
-normals <- getAnnualNormals("2061_2090", variables, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, rcp="RCP85", climModel="Hadley")
+normals <- getAnnualNormals("2061_2090", locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, rcp="RCP85", climModel="Hadley")
 
 test_that("Testing that 2061-2090 annual normals under RCP 8.5 and climate model Hadley for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(normals[which(normals$id == "Quebec"),"TN"] - 7.672329) < 1E-4, TRUE)

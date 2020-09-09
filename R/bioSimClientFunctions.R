@@ -37,14 +37,6 @@ allMonths <- c("January", "February", "March", "April", "May", "June", "July", "
 }
 
 
-.createVariableList <- function(variables) {
-  myVariables <- J4R::createJavaObject("biosimclient.BioSimEnums$Variable", variables)
-  jList <- J4R::createJavaObject("java.util.ArrayList")
-  jList$add(myVariables)
-  return(jList)
-}
-
-
 #'
 #' Return the normals for a period
 #'
@@ -52,7 +44,6 @@ allMonths <- c("January", "February", "March", "April", "May", "June", "July", "
 #' this argument is filled with some months, then the normal are aggregated over these months.
 #'
 #' @param period a string representing the period (either "1951_1980", "1961_1990", "1971_2000", "1981_2010" up to "2071_2100")
-#' @param variables the variables of interest typically a vector such as c("TN", "TX", "P") for minimum temperature, maximum temperature and precipitation
 #' @param id a vector with the ids of the plots
 #' @param latDeg the latitudes of the plots
 #' @param longDeg the longitudes of the plots
@@ -66,14 +57,13 @@ allMonths <- c("January", "February", "March", "April", "May", "June", "July", "
 #' @examples
 #'
 #' locations <- BioSIM::twoLocationsInSouthernQuebec
-#' variables <- c("TN","TX","P")
 #' \dontrun{
-#' summerMean <- getNormals("1981_2010", variables, locations$Name, locations$Latitude,
+#' summerMean <- getNormals("1981_2010", locations$Name, locations$Latitude,
 #'                           locations$Longitude, locations$Elevation,
 #'                           c("June", "July", "August"))}
 #'
 #' @export
-getNormals <- function(period, variables, id, latDeg, longDeg, elevM, averageOverTheseMonths, rcp="RCP45", climModel = "RCM4") {
+getNormals <- function(period, id, latDeg, longDeg, elevM, averageOverTheseMonths, rcp="RCP45", climModel = "RCM4") {
   # For debugging
   # period <- "1981_2010"
   # id <- locations$id
@@ -100,11 +90,10 @@ getNormals <- function(period, variables, id, latDeg, longDeg, elevM, averageOve
     isSummarized <- T
   }
   jPeriod <- J4R::createJavaObject("biosimclient.BioSimEnums$Period", paste("FromNormals", period, sep=""))
-  jVariables <- .createVariableList(variables)
   jRCP <- J4R::createJavaObject("biosimclient.BioSimEnums$RCP", rcp)
   jClimModel <- J4R::createJavaObject("biosimclient.BioSimEnums$ClimateModel", climModel)
 
-  maps <- J4R::callJavaMethod("biosimclient.BioSimClient", "getNormals", jPeriod, jVariables, jPlots, jRCP, jClimModel, jAverageOverTheseMonths)
+  maps <- J4R::callJavaMethod("biosimclient.BioSimClient", "getNormals", jPeriod, jPlots, jRCP, jClimModel, jAverageOverTheseMonths)
 
   listOfPlots <- J4R::getAllValuesFromListObject(jPlots)
 
@@ -118,7 +107,6 @@ getNormals <- function(period, variables, id, latDeg, longDeg, elevM, averageOve
 #' Return the annual normals for a period
 #'
 #' @param period a string representing the period (either "1951_1980", "1961_1990", "1971_2000", "1981_2010" up to "2071_2100")
-#' @param variables the variables of interest typically a vector such as c("TN", "TX", "P") for minimum temperature, maximum temperature and precipitation
 #' @param id a vector with the ids of the plots
 #' @param latDeg the latitudes of the plots
 #' @param longDeg the longitudes of the plots
@@ -131,14 +119,13 @@ getNormals <- function(period, variables, id, latDeg, longDeg, elevM, averageOve
 #' @examples
 #'
 #' locations <- BioSIM::twoLocationsInSouthernQuebec
-#' variables <- c("TN","TX","P")
 #' \dontrun{
 #' annualNormals <- getAnnualNormals("1981_2010", variables, locations$Name, locations$Latitude,
 #'                                      locations$Longitude, locations$Elevation)}
 #'
 #' @export
-getAnnualNormals <- function(period, variables, id, latDeg, longDeg, elevM, rcp="RCP45", climModel = "RCM4") {
-  return(getNormals(period, variables, id, latDeg, longDeg, elevM, BioSIM::allMonths, rcp, climModel))
+getAnnualNormals <- function(period, id, latDeg, longDeg, elevM, rcp="RCP45", climModel = "RCM4") {
+  return(getNormals(period, id, latDeg, longDeg, elevM, BioSIM::allMonths, rcp, climModel))
 }
 
 
@@ -146,7 +133,6 @@ getAnnualNormals <- function(period, variables, id, latDeg, longDeg, elevM, rcp=
 #' Return the monthly normals for a period
 #'
 #' @param period a string representing the period (either "1951_1980", "1961_1990", "1971_2000", "1981_2010" up to "2071_2100")
-#' @param variables the variables of interest typically a vector such as c("TN", "TX", "P") for minimum temperature, maximum temperature and precipitation
 #' @param id a vector with the ids of the plots
 #' @param latDeg the latitudes of the plots
 #' @param longDeg the longitudes of the plots
@@ -159,14 +145,13 @@ getAnnualNormals <- function(period, variables, id, latDeg, longDeg, elevM, rcp=
 #' @examples
 #'
 #' locations <- BioSIM::twoLocationsInSouthernQuebec
-#' variables <- c("TN","TX","P")
 #' \dontrun{
-#' monthlyMeans <- getMonthlyNormals("1981_2010", variables, locations$Name, locations$Latitude,
+#' monthlyMeans <- getMonthlyNormals("1981_2010", locations$Name, locations$Latitude,
 #'                                    locations$Longitude, locations$Elevation)}
 #'
 #' @export
-getMonthlyNormals <- function(period, variables, id, latDeg, longDeg, elevM, rcp="RCP45", climModel = "RCM4") {
-  return(getNormals(period, variables, id, latDeg, longDeg, elevM, NULL, rcp, climModel))
+getMonthlyNormals <- function(period, id, latDeg, longDeg, elevM, rcp="RCP45", climModel = "RCM4") {
+  return(getNormals(period, id, latDeg, longDeg, elevM, NULL, rcp, climModel))
 }
 
 #'

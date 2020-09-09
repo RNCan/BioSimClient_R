@@ -6,7 +6,6 @@
 \usage{
 getMonthlyNormals(
   period,
-  variables,
   id,
   latDeg,
   longDeg,
@@ -17,8 +16,6 @@ getMonthlyNormals(
 }
 \arguments{
 \item{period}{a string representing the period (either "1951_1980", "1961_1990", "1971_2000", "1981_2010" up to "2071_2100")}
-
-\item{variables}{the variables of interest typically a vector such as c("TN", "TX", "P") for minimum temperature, maximum temperature and precipitation}
 
 \item{id}{a vector with the ids of the plots}
 
@@ -41,9 +38,8 @@ Return the monthly normals for a period
 \examples{
 
 locations <- BioSIM::twoLocationsInSouthernQuebec
-variables <- c("TN","TX","P")
 \dontrun{
-monthlyMeans <- getMonthlyNormals("1981_2010", variables, locations$Name, locations$Latitude,
+monthlyMeans <- getMonthlyNormals("1981_2010", locations$Name, locations$Latitude,
                                    locations$Longitude, locations$Elevation)}
 
 }

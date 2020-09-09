@@ -157,20 +157,13 @@ public final class BioSimClient {
 
 	
 	private static LinkedHashMap<BioSimPlot, BioSimDataSet> internalCalculationForNormals(Period period,
-			List<Variable> variables, List<BioSimPlot> locations,
+			List<BioSimPlot> locations,
 			RCP rcp,
 			ClimateModel climModel,
 			List<Month> averageOverTheseMonths) throws BioSimClientException, BioSimServerException {
 		LinkedHashMap<BioSimPlot, BioSimDataSet> outputMap = new LinkedHashMap<BioSimPlot, BioSimDataSet>();
 
-		String variablesQuery = "";
-		for (Variable v : variables) {
-			variablesQuery += v.name();
-			if (variables.indexOf(v) < variables.size() - 1) {
-				variablesQuery += SPACE_IN_REQUEST;
-			}
-		}
-
+		String variablesQuery = getVariablesQuery();
 
 		String query = constructCoordinatesQuery(locations);
 
@@ -191,13 +184,27 @@ public final class BioSimClient {
 		readLines(serverReply, "month", locations, outputMap);
 
 		if (averageOverTheseMonths == null || averageOverTheseMonths.isEmpty()) {
+			List<Integer> fieldsToBeRemoved = null;
+			for (BioSimDataSet bioSimDataSet : outputMap.values()) {
+				if (fieldsToBeRemoved == null) {
+					fieldsToBeRemoved = new ArrayList<Integer>();
+					for (int i = bioSimDataSet.getFieldNames().size() - 1; i > 0; i--) {	// reverse order
+						if (!Variable.getFieldNames().contains(bioSimDataSet.getFieldNames().get(i))) {
+							fieldsToBeRemoved.add(i);
+						}
+					}
+				}
+				for (Integer fieldId : fieldsToBeRemoved) {
+					bioSimDataSet.removeField(fieldId);
+				}
+			}
 			return outputMap;
 		} else {
 			LinkedHashMap<BioSimPlot, BioSimDataSet> formattedOutputMap = new LinkedHashMap<BioSimPlot, BioSimDataSet>();
 			for (BioSimPlot location : outputMap.keySet()) {
 				BioSimDataSet ds = outputMap.get(location);
 				BioSimMonthMap bsmm = new BioSimMonthMap(ds);
-				formattedOutputMap.put(location, bsmm.getMeanForTheseMonths(averageOverTheseMonths, variables));
+				formattedOutputMap.put(location, bsmm.getMeanForTheseMonths(averageOverTheseMonths));
 			}
 			return formattedOutputMap;
 		}
@@ -228,7 +235,6 @@ public final class BioSimClient {
 	/**
 	 * Retrieves the normals and compiles the mean or sum over some months.
 	 * @param period a Period enum variable
-	 * @param variables a List of Variable enum to be retrieved and compiled
 	 * @param locations a List of BioSimPlot instances
 	 * @param rcp an RCP enum variable (if null the server takes the RCP 4.5 by default 
 	 * @param climModel a ClimateModel enum variable (if null the server takes the RCM4 climate model
@@ -240,7 +246,6 @@ public final class BioSimClient {
 	 */
 	public static LinkedHashMap<BioSimPlot, BioSimDataSet> getNormals(
 			Period period,
-			List<Variable> variables, 
 			List<BioSimPlot> locations,
 			RCP rcp,
 			ClimateModel climModel,
@@ -257,12 +262,12 @@ public final class BioSimClient {
 				while (!copyList.isEmpty() && subList.size() < MAXIMUM_NB_LOCATIONS_PER_BATCH_NORMALS) {
 					subList.add(copyList.remove(0));
 				}
-				resultingMap.putAll(internalCalculationForNormals(period, variables, subList, rcp, climModel, averageOverTheseMonths));
+				resultingMap.putAll(internalCalculationForNormals(period, subList, rcp, climModel, averageOverTheseMonths));
 				subList.clear();
 			}
 			return resultingMap;
 		} else {
-			return internalCalculationForNormals(period, variables, locations, rcp, climModel, averageOverTheseMonths);
+			return internalCalculationForNormals(period, locations, rcp, climModel, averageOverTheseMonths);
 		}
 	}
 
@@ -327,7 +332,6 @@ public final class BioSimClient {
 	/**
 	 * Retrieves the monthly normals.
 	 * @param period a Period enum variable
-	 * @param variables a List of Variable enum to be retrieved and compiled
 	 * @param locations a List of BioSimPlot instances
 	 * @param rcp an RCP enum variable (if null the server takes the RCP 4.5 by default 
 	 * @param climModel a ClimateModel enum variable (if null the server takes the RCM4 climate model
@@ -336,17 +340,15 @@ public final class BioSimClient {
 	 */
 	public static Map<BioSimPlot, BioSimDataSet> getMonthlyNormals(
 			Period period, 
-			List<Variable> variables,
 			List<BioSimPlot> locations,
 			RCP rcp,
 			ClimateModel climModel) throws BioSimClientException, BioSimServerException {
-		return getNormals(period, variables, locations, rcp, climModel, null);
+		return getNormals(period, locations, rcp, climModel, null);
 	}
 
 	/**
 	 * Retrieves the yearly normals.
 	 * @param period a Period enum variable
-	 * @param variables a List of Variable enum to be retrieved and compiled
 	 * @param locations a List of BioSimPlot instances
 	 * @param rcp an RCP enum variable (if null the server takes the RCP 4.5 by default 
 	 * @param climModel a ClimateModel enum variable (if null the server takes the RCM4 climate model
@@ -355,11 +357,10 @@ public final class BioSimClient {
 	 */
 	public static Map<BioSimPlot, BioSimDataSet> getAnnualNormals(
 			Period period, 
-			List<Variable> variables,
 			List<BioSimPlot> locations,
 			RCP rcp,
 			ClimateModel climModel) throws BioSimClientException, BioSimServerException {
-		return getNormals(period, variables, locations, rcp, climModel, AllMonths);
+		return getNormals(period, locations, rcp, climModel, AllMonths);
 	}
 
 	private static String constructCoordinatesQuery(List<BioSimPlot> locations) {
@@ -400,6 +401,19 @@ public final class BioSimClient {
 			return "" + location.getElevationM();
 		}
 	}
+	
+	@Deprecated
+	private static String getVariablesQuery() {		// TODO FP remove this when the server side is updated
+		String variablesQuery = "";
+		List<Variable> variables = Arrays.asList(Variable.values());
+		for (Variable v : variables) {
+			variablesQuery += v.name();
+			if (variables.indexOf(v) < variables.size() - 1) {
+				variablesQuery += SPACE_IN_REQUEST;
+			}
+		}
+		return variablesQuery;
+	}
 
 	/**
 	 * Generates climate for some locations over a particular time interval.
@@ -424,19 +438,8 @@ public final class BioSimClient {
 		boolean compress = false; // disabling compression by default
 		LinkedHashMap<BioSimPlot, String> outputMap = new LinkedHashMap<BioSimPlot, String>();
 
-		List<Variable> var = new ArrayList<Variable>();		// TODO remove this part when the server query handler has been updated.
-		var.add(Variable.TN);
-		var.add(Variable.TX);
-		var.add(Variable.P);
-
-		String variablesQuery = "";
-		for (Variable v : var) {
-			variablesQuery += v.name();
-			if (var.indexOf(v) < var.size() - 1) {
-				variablesQuery += SPACE_IN_REQUEST;
-			}
-		}
-
+		String variablesQuery = getVariablesQuery();
+		
 		String query = constructCoordinatesQuery(locations);
 		query += "&var=" + variablesQuery;
 		if (compress) {
@@ -609,7 +612,7 @@ public final class BioSimClient {
 	 * @param locations the locations of the plots (BioSimPlot instances)
 	 * @param modelName a string representing the model name
 	 * @param rcp an RCP enum variable (by default RCP 4.5)
-	 * @param climModel a ClimateModel enum variable (by default RCM 4)
+	 * @param climMod a ClimateModel enum variable (by default RCM 4)
 	 * @param rep the number of replicates if needed. Should be equal to or greater than 1. 
 	 * @param additionalParms a BioSimParameterMap instance that contains the eventual additional parameters for the model
 	 * @return a LinkedHashMap of BioSimPlot instances (keys) and climate variables (values)
@@ -641,7 +644,7 @@ public final class BioSimClient {
 	 * @param toYr ending date (yr) of the period (inclusive)
 	 * @param locations the locations of the plots (BioSimPlot instances)
 	 * @param rcp an RCP enum variable (by default RCP 4.5)
-	 * @param climModel a ClimateModel enum variable (by default RCM 4)
+	 * @param climMod a ClimateModel enum variable (by default RCM 4)
 	 * @param modelName a string representing the model name
 	 * @param additionalParms a BioSimParameterMap instance that contains the eventual additional parameters for the model
 	 * @return a LinkedHashMap of BioSimPlot instances (keys) and climate variables (values)
@@ -727,7 +730,7 @@ public final class BioSimClient {
 	 * @param toYr ending date (yr) of the period (inclusive)
 	 * @param locations the locations of the plots (BioSimPlot instances)
 	 * @param rcp an RCP enum variable (by default RCP 4.5)
-	 * @param climModel a ClimateModel enum variable (by default RCM 4)
+	 * @param climMod a ClimateModel enum variable (by default RCM 4)
 	 * @param modelName a string representing the model name
 	 * @param rep the number of replicates if needed. Should be equal to or greater than 1. 
 	 * @param isEphemeral a boolean that overrides the storage procedure on the server
@@ -784,7 +787,7 @@ public final class BioSimClient {
 	 * @param toYr ending date (yr) of the period (inclusive)
 	 * @param locations the locations of the plots (BioSimPlot instances)
 	 * @param rcp an RCP enum variable (by default RCP 4.5)
-	 * @param climModel a ClimateModel enum variable (by default RCM 4)
+	 * @param climMod a ClimateModel enum variable (by default RCM 4)
 	 * @param modelName a string representing the model name
 	 * @param isEphemeral a boolean that overrides the storage procedure on the server
 	 * @param additionalParms a BioSimParameterMap instance that contains the eventual additional parameters for the model
