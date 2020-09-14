@@ -84,3 +84,35 @@ shutdownJava <- function() {
 }
 
 
+#'
+#' Set the climate generation option
+#'
+#' The climate generation option forces BioSIM to generate climate for past dates instead of
+#' using the observations from the climate stations. By default this option is set to false.
+#'
+#' @param bool a logical
+#'
+#' @export
+biosimclient.setForceClimateGenerationEnabled <- function(bool) {
+  if (is.null(bool) || !is.logical(bool)) {
+    stop("The bool parameter must be a logical!")
+  }
+  .connectToBioSIMClient()
+  J4R::callJavaMethod("biosimclient.BioSimClient", "setForceClimateGenerationEnabled", bool)
+}
+
+#'
+#' Report of the climate generation option
+#'
+#' The climate generation option forces BioSIM to generate climate for past dates instead of
+#' using the observations from the climate stations. By default this option is set to false.
+#' The option can be set through the biosimclient.setForceClimateGenerationEnabled function.
+#'
+#' @return a logical: true if the option is enabled or false otherwise
+#'
+#' @export
+biosimclient.isForceClimateGenerationEnabled <- function() {
+  .connectToBioSIMClient()
+  J4R::callJavaMethod("biosimclient.BioSimClient", "isForceClimateGenerationEnabled")
+}
+

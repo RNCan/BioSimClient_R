@@ -85,22 +85,23 @@ public class BioSimEnums {
 		
 	static enum Variable {	
 		TN("TMIN_MN", false, "min air temperature"),
-//		T("", false, "air temperature"),
+		T("", false, "air temperature"),
 		TX("TMAX_MN", false, "max air temperature"),
 		P("PRCP_TT", true, "precipitation"),
-//		TD("TDEX_MN", false, "temperature dew point"),
-//		H("", false, "humidity"),
-//		WS("", false, "wind speed"),
-//		WD("", false, "wind direction"),
-//		R("", true, "solar radiation"),
-//		Z("", false, "atmospheric pressure"),
-//		S("", true, "snow precipitation"),
-//		SD("", false, "snow depth accumulation"),
-//		SWE("", true, "snow water equivalent"),
-//		WS2("", false, "wind speed at 2 m");
+		TD("TDEX_MN", false, "temperature dew point"),
+		H("", false, "humidity"),
+		WS("", false, "wind speed"),
+		WD("", false, "wind direction"),
+		R("", true, "solar radiation"),
+		Z("", false, "atmospheric pressure"),
+		S("", true, "snow precipitation"),
+		SD("", false, "snow depth accumulation"),
+		SWE("", true, "snow water equivalent"),
+		WS2("", false, "wind speed at 2 m");
 		;
 		
 		private static List<String> FieldNames;
+		private static List<Variable> VariablesForNormals;
 		
 		String description;
 		String fieldName;
@@ -114,16 +115,27 @@ public class BioSimEnums {
 		
 		boolean isAdditive() {return additive;};
 		String getDescription() {return description;}
-
-		static List<String> getFieldNames() {
+		
+		static List<Variable> getVariablesForNormals() {
+			if (VariablesForNormals == null) {
+				VariablesForNormals = new ArrayList<Variable>();
+				VariablesForNormals.add(Variable.TN);
+				VariablesForNormals.add(Variable.TX);
+				VariablesForNormals.add(Variable.P);
+			}
+			return VariablesForNormals;
+		}
+		
+		static List<String> getFieldNamesForNormals() {
 			if (FieldNames == null) {
 				FieldNames = new ArrayList<String>();
-				for (Variable v : Variable.values()) {
+				for (Variable v : getVariablesForNormals()) {
 					FieldNames.add(v.fieldName);
 				}
 			}
 			return FieldNames;
 		}
+		
  	}
 	
 	public static enum Month {

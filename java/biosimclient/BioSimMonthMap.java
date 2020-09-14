@@ -65,7 +65,7 @@ class BioSimMonthMap extends LinkedHashMap<Month, Map<Variable, Double>> {
 		int nbDays = 0;
 		for (Month month : months) {
 			if (containsKey(month)) {
-				for (Variable var : Variable.values()) {
+				for (Variable var : Variable.getVariablesForNormals()) {
 					if (get(month).containsKey(var)) {
 						double value = get(month).get(var);
 						if (!var.isAdditive()) {
@@ -84,7 +84,7 @@ class BioSimMonthMap extends LinkedHashMap<Month, Map<Variable, Double>> {
 			}
 			nbDays += month.nbDays;
 		}
-		for (Variable var : Variable.values()) {
+		for (Variable var : Variable.getVariablesForNormals()) {
 			if (!var.additive) {
 				outputMap.put(var, outputMap.get(var) / nbDays);
 			}
