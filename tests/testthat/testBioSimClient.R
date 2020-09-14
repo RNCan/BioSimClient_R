@@ -153,6 +153,18 @@ test_that("Testing degree-days above 5C in 2017 and 2018 can be properly retriev
   expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2018),"DD"] - 2390.85) < 1E-4, TRUE)
 })
 
+
+biosimclient.setForceClimateGenerationEnabled(T)
+degreeDays <- getModelOutput(2017, 2018, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, "DegreeDay_Annual", T, additionalParms = c("LowerThreshold"=5))
+
+test_that("Testing degree-days above 5C in 2017 and 2018 are generated and not compiled from observations", {
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2017),"DD"] - 1789.10) > 1E-4, TRUE)
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2018),"DD"] - 1774.20) > 1E-4, TRUE)
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2017),"DD"] - 2396.45) > 1E-4, TRUE)
+  expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2018),"DD"] - 2390.85) > 1E-4, TRUE)
+})
+biosimclient.setForceClimateGenerationEnabled(F)
+
 shutdownJava()
 
 

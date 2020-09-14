@@ -40,8 +40,9 @@ class BioSimQuerySignature {
 	final double longitudeDeg;
 	final double elevationM;
 	final int rep;
+	final boolean isForceClimateGenerationEnabled;
 	
-	BioSimQuerySignature(int initialYear, int finalYear, BioSimPlot location, RCP rcp, ClimateModel climMod, int rep) {
+	BioSimQuerySignature(int initialYear, int finalYear, BioSimPlot location, RCP rcp, ClimateModel climMod, int rep, boolean forceClimateGenerationEnabled) {
 		this.initialYear = initialYear;
 		this.finalYear = finalYear;
 		if (rcp == null) {
@@ -58,6 +59,7 @@ class BioSimQuerySignature {
 		this.longitudeDeg = location.getLongitudeDeg();
 		this.elevationM = location.getElevationM();
 		this.rep = rep;
+		this.isForceClimateGenerationEnabled = forceClimateGenerationEnabled;
 	}
 
 	@Override
@@ -67,12 +69,14 @@ class BioSimQuerySignature {
 			if (thatQuery.initialYear == initialYear) {
 				if (thatQuery.finalYear == finalYear) {
 					if (thatQuery.rep == rep) {
-						if (thatQuery.rcp == rcp) {
-							if (thatQuery.climMod == climMod) {
-								if (Math.abs(thatQuery.latitudeDeg - latitudeDeg) < 1E-5) {		// about 1 m at equator
-									if (Math.abs(thatQuery.longitudeDeg - longitudeDeg) < 1E-5) { // about 1 m at equator
-										if (Math.abs(thatQuery.elevationM - elevationM) < 1d) { // one meter 
-											return true;
+						if (thatQuery.isForceClimateGenerationEnabled == isForceClimateGenerationEnabled) {
+							if (thatQuery.rcp == rcp) {
+								if (thatQuery.climMod == climMod) {
+									if (Math.abs(thatQuery.latitudeDeg - latitudeDeg) < 1E-5) {		// about 1 m at equator
+										if (Math.abs(thatQuery.longitudeDeg - longitudeDeg) < 1E-5) { // about 1 m at equator
+											if (Math.abs(thatQuery.elevationM - elevationM) < 1d) { // one meter 
+												return true;
+											}
 										}
 									}
 								}
