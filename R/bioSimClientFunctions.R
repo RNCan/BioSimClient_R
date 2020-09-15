@@ -215,7 +215,8 @@ getModelList <- function() {
 #' @param elevM the elevations of the plots (can contain some NA, in which case BioSim relies on a digital elevation model)
 #' @param modelName a character. Should be one of the models listed in the available models (see the getModelList() method)
 #' @param isEphemeral a logical. If set to true, the generated climate is not stored on the server, which implies a greater
-#' computational burden and inconsistencies if different models are applied on the same locations.
+#' computational burden and inconsistencies if different models are applied on the same locations. By default, it is set to
+#' true.
 #' @param rep number of replicates of generated climate (is set to 1 by default)
 #' @param rcp an representative concentration pathway (either "RCP45" or "RCP85")
 #' @param climModel a climatic model (either "RCM4", "GCM4" or "Hadley")
@@ -233,7 +234,7 @@ getModelList <- function() {
 #'                              F, rcp = "RCP85", climModel = "GCM4", additionalParms = addParms)}
 #'
 #' @export
-getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, isEphemeral, rep = 1, rcp = "RCP45", climModel = "RCM4", additionalParms = NULL) {
+getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, isEphemeral = F, rep = 1, rcp = "RCP45", climModel = "RCM4", additionalParms = NULL) {
   # For debugging
   # fromYr <- 1998
   # toYr <- 2006
