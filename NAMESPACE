@@ -2,7 +2,7 @@
 
 export(allMonths)
 export(biosimclient.config)
-export(biosimclient.geConfiguration)
+export(biosimclient.getConfiguration)
 export(clearCache)
 export(getAnnualNormals)
 export(getModelList)

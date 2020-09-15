@@ -16,18 +16,20 @@ biosimclient.config(
 }
 \description{
 The forceClimateGenerationEnabled argument forces BioSIM to generate climate for past dates instead of
-using the observations from the climate stations. By default this option is set to false.
+using the observations from the climate stations. By default this option is set to false. The
+nbNearestNeighbours argument sets the number of stations for the imputation of climate variables.
 }
 \details{
-The nbNearestNeighbours argument sets the number of stations for the imputation of climate variables.
-
 If an argument is set to null, there is no effect at all. If all the arguments are set to null, then
 the configuration is reset to its default value: the climate variables of past dates relies on observations
 and the number of climate stations is set to 4.
 }
 \examples{
 \dontrun{
-biosimclient.config(T, 20) ### enables the climate generation for past dates and uses 20 climate stations
-biosimclient.config() ### reset the configuration}
+### enables the climate generation for past dates and uses 20 climate stations
+biosimclient.config(T, 20)
+
+### reset the configuration
+biosimclient.config() }
 
 }
