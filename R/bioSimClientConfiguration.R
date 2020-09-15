@@ -88,9 +88,8 @@ shutdownJava <- function() {
 #' Configure the client
 #'
 #' The forceClimateGenerationEnabled argument forces BioSIM to generate climate for past dates instead of
-#' using the observations from the climate stations. By default this option is set to false.
-#'
-#' The nbNearestNeighbours argument sets the number of stations for the imputation of climate variables.
+#' using the observations from the climate stations. By default this option is set to false. The
+#' nbNearestNeighbours argument sets the number of stations for the imputation of climate variables.
 #'
 #' If an argument is set to null, there is no effect at all. If all the arguments are set to null, then
 #' the configuration is reset to its default value: the climate variables of past dates relies on observations
@@ -98,8 +97,11 @@ shutdownJava <- function() {
 #'
 #' @examples
 #' \dontrun{
-#' biosimclient.config(T, 20) ### enables the climate generation for past dates and uses 20 climate stations
-#' biosimclient.config() ### reset the configuration}
+#' ### enables the climate generation for past dates and uses 20 climate stations
+#' biosimclient.config(T, 20)
+#'
+#' ### reset the configuration
+#' biosimclient.config() }
 #'
 #' @param forceClimateGenerationEnabled a logical
 #' @param nbNearestNeighbours an integer
@@ -136,9 +138,7 @@ biosimclient.config <- function(forceClimateGenerationEnabled = NULL, nbNearestN
 #'
 #' The isForceClimateGenerationEnabled setting forces BioSIM to generate climate for past dates
 #' instead of using the observations from the climate stations. By default this option is set
-#' to false.
-#'
-#' The nbNearestNeighbours setting is the number of stations used to impute climate variables to a
+#' to false. The nbNearestNeighbours setting is the number of stations used to impute climate variables to a
 #' particular location.
 #'
 #' All the settings can be changed through the biosimclient.config function.
@@ -146,7 +146,7 @@ biosimclient.config <- function(forceClimateGenerationEnabled = NULL, nbNearestN
 #' @return a data.frame object
 #'
 #' @export
-biosimclient.geConfiguration <- function() {
+biosimclient.getConfiguration <- function() {
   .connectToBioSIMClient()
   isForceClimateGenerationEnabled <- J4R::callJavaMethod("biosimclient.BioSimClient", "isForceClimateGenerationEnabled")
   nbNearestNeighbours <- J4R::callJavaMethod("biosimclient.BioSimClient", "getNbNearestNeighbours")
