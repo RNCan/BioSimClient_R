@@ -85,34 +85,73 @@ shutdownJava <- function() {
 
 
 #'
-#' Set the climate generation option
+#' Configure the client
 #'
-#' The climate generation option forces BioSIM to generate climate for past dates instead of
+#' The forceClimateGenerationEnabled argument forces BioSIM to generate climate for past dates instead of
 #' using the observations from the climate stations. By default this option is set to false.
 #'
-#' @param bool a logical
+#' The nbNearestNeighbours argument sets the number of stations for the imputation of climate variables.
+#'
+#' If an argument is set to null, there is no effect at all. If all the arguments are set to null, then
+#' the configuration is reset to its default value: the climate variables of past dates relies on observations
+#' and the number of climate stations is set to 4.
+#'
+#' @examples
+#' \dontrun{
+#' biosimclient.config(T, 20) ### enables the climate generation for past dates and uses 20 climate stations
+#' biosimclient.config() ### reset the configuration}
+#'
+#' @param forceClimateGenerationEnabled a logical
+#' @param nbNearestNeighbours an integer
 #'
 #' @export
-biosimclient.setForceClimateGenerationEnabled <- function(bool) {
-  if (is.null(bool) || !is.logical(bool)) {
-    stop("The bool parameter must be a logical!")
+biosimclient.config <- function(forceClimateGenerationEnabled = NULL, nbNearestNeighbours = NULL) {
+  if (!is.null(forceClimateGenerationEnabled)) {
+    if (!is.logical(forceClimateGenerationEnabled)) {
+      stop("The forceClimateGenerationEnabled parameter must be a logical!")
+    } else {
+      .connectToBioSIMClient()
+      J4R::callJavaMethod("biosimclient.BioSimClient", "setForceClimateGenerationEnabled", forceClimateGenerationEnabled)
+    }
   }
-  .connectToBioSIMClient()
-  J4R::callJavaMethod("biosimclient.BioSimClient", "setForceClimateGenerationEnabled", bool)
+
+  if (!is.null(nbNearestNeighbours)) {
+    if (!is.numeric(nbNearestNeighbours)) {
+      stop("The nbNearestNeighbours parameter must be an integer!")
+    } else {
+      .connectToBioSIMClient()
+      J4R::callJavaMethod("biosimclient.BioSimClient", "setNbNearestNeighbours", as.integer(nbNearestNeighbours))
+    }
+  }
+
+  if (is.null(forceClimateGenerationEnabled) && is.null(nbNearestNeighbours)) {
+    .connectToBioSIMClient()
+    J4R::callJavaMethod("biosimclient.BioSimClient", "resetClientConfiguration")
+    message("The configuration of the client has been reset to its default value!")
+  }
 }
 
 #'
-#' Report of the climate generation option
+#' Report of the climate generation settings
 #'
-#' The climate generation option forces BioSIM to generate climate for past dates instead of
-#' using the observations from the climate stations. By default this option is set to false.
-#' The option can be set through the biosimclient.setForceClimateGenerationEnabled function.
+#' The isForceClimateGenerationEnabled setting forces BioSIM to generate climate for past dates
+#' instead of using the observations from the climate stations. By default this option is set
+#' to false.
 #'
-#' @return a logical: true if the option is enabled or false otherwise
+#' The nbNearestNeighbours setting is the number of stations used to impute climate variables to a
+#' particular location.
+#'
+#' All the settings can be changed through the biosimclient.config function.
+#'
+#' @return a data.frame object
 #'
 #' @export
-biosimclient.isForceClimateGenerationEnabled <- function() {
+biosimclient.geConfiguration <- function() {
   .connectToBioSIMClient()
-  J4R::callJavaMethod("biosimclient.BioSimClient", "isForceClimateGenerationEnabled")
+  isForceClimateGenerationEnabled <- J4R::callJavaMethod("biosimclient.BioSimClient", "isForceClimateGenerationEnabled")
+  nbNearestNeighbours <- J4R::callJavaMethod("biosimclient.BioSimClient", "getNbNearestNeighbours")
+  setting <- c("isForceClimateGenerationEnabled", "nbNearestNeighbours")
+  value <- c(as.character(isForceClimateGenerationEnabled), as.character(nbNearestNeighbours))
+  return(data.frame(setting, value))
 }
 

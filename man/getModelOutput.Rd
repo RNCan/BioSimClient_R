@@ -12,7 +12,7 @@ getModelOutput(
   longDeg,
   elevM,
   modelName,
-  isEphemeral,
+  isEphemeral = F,
   rep = 1,
   rcp = "RCP45",
   climModel = "RCM4",
@@ -35,7 +35,8 @@ getModelOutput(
 \item{modelName}{a character. Should be one of the models listed in the available models (see the getModelList() method)}
 
 \item{isEphemeral}{a logical. If set to true, the generated climate is not stored on the server, which implies a greater
-computational burden and inconsistencies if different models are applied on the same locations.}
+computational burden and inconsistencies if different models are applied on the same locations. By default, it is set to
+true.}
 
 \item{rep}{number of replicates of generated climate (is set to 1 by default)}
 

@@ -103,6 +103,8 @@ public final class BioSimClient {
 
 	static boolean ForceClimateGenerationEnabled = false;  // default value
 	
+	static Integer NbNearestNeighbours = null;
+	
 	private static String addQueryIfAny(String urlString, String query) {
 		if (query != null && !query.isEmpty()) {
 			return urlString.trim() + "?" + query;
@@ -461,6 +463,10 @@ public final class BioSimClient {
 			query += "&source=FromNormals";
 		}
 		
+		if (NbNearestNeighbours != null) {
+			query += "&nb_nearest_neighbor=" + NbNearestNeighbours.toString();
+		}
+		
 		if (rep > 1) {
 			query += "&rep=" + rep;
 		}
@@ -810,6 +816,17 @@ public final class BioSimClient {
 		return getModelOutput(fromYr, toYr, locations, rcp, climMod, modelName, 1, isEphemeral, additionalParms);
 	}
 
+	
+	
+	/**
+	 * Reset the configuration to its initial values.
+	 */
+	public static void resetClientConfiguration() {
+		NbNearestNeighbours = null;
+		ForceClimateGenerationEnabled = false;
+	}
+	
+	
 	/**
 	 * By default the climate generation retrieves the observations for the
 	 * dates prior to the current date. If this option is set to true, then 
@@ -819,7 +836,7 @@ public final class BioSimClient {
 	 * @param bool a boolean
 	 */
 	public static void setForceClimateGenerationEnabled(boolean bool) {
-		BioSimClient.ForceClimateGenerationEnabled = bool;
+		ForceClimateGenerationEnabled = bool;
 	}
 
 	/**
@@ -830,6 +847,31 @@ public final class BioSimClient {
 	public static boolean isForceClimateGenerationEnabled() {
 		return BioSimClient.ForceClimateGenerationEnabled;
 	}
+
+	/**
+	 * This option set the number of stations in the imputation of the climate variables
+	 * @param nbNearestNeighbours an integer between 1 and 35. The default is 4 stations.
+	 */
+	public static void setNbNearestNeighbours(int nbNearestNeighbours) {
+		if (nbNearestNeighbours < 1 || nbNearestNeighbours > 35) {
+			throw new InvalidParameterException("The number of nearest neighbours must be an integer between 1 and 35!");
+		}
+		NbNearestNeighbours = nbNearestNeighbours;
+	}
+
+	/**
+	 * Returns the number of climate station used in the imputation of the climate variables.
+	 * @return an integer
+	 */
+	public static int getNbNearestNeighbours() {
+		if (NbNearestNeighbours == null) {
+			return 4; // default value
+		} else {
+			return NbNearestNeighbours;
+		}
+	}
+	
+	
 
 //	public static void main(String[] args) throws BioSimClientException {
 ////		List<String> references = new ArrayList<String>();
