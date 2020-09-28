@@ -180,11 +180,14 @@ test_that("Testing default parameters are returned", {
   expect_equal(length(addParms), 8)
 })
 
-dd <- getModelOutput(2017, 2018, "lostSomewhere", 50, -70, 300, "DegreeDay_Annual", additionalParms = addParms)
+dd1 <- getModelOutput(2017, 2018, "lostSomewhere", 50, -70, 300, "DegreeDay_Annual")
+dd2 <- getModelOutput(2017, 2018, "lostSomewhere", 50, -70, 300, "DegreeDay_Annual", additionalParms = addParms)
 test_that("Testing degree-days above 5C in 2017 and 2018 are generated and not compiled from observations", {
-  expect_equal(length(dd[,1]), 2)
-  expect_equal(dd[which(dd$id == "lostSomewhere" & dd$Year == 2017),"DD"], 2105.40)
-  expect_equal(dd[which(dd$id == "lostSomewhere" & dd$Year == 2018),"DD"], 2000.85)
+  expect_equal(length(dd1[,1]), 2)
+  expect_equal(dd1[which(dd1$id == "lostSomewhere" & dd1$Year == 2017),"DD"], 2105.40)
+  expect_equal(dd1[which(dd1$id == "lostSomewhere" & dd1$Year == 2018),"DD"], 2000.85)
+  expect_equal(dd1[which(dd1$id == "lostSomewhere" & dd1$Year == 2017),"DD"], dd2[which(dd2$id == "lostSomewhere" & dd2$Year == 2017),"DD"])
+  expect_equal(dd1[which(dd1$id == "lostSomewhere" & dd1$Year == 2018),"DD"], dd2[which(dd2$id == "lostSomewhere" & dd2$Year == 2018),"DD"])
 })
 
 
