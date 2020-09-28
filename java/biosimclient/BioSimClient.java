@@ -50,12 +50,12 @@ import biosimclient.BioSimEnums.Variable;
  */
 public final class BioSimClient {
 
-	private static final int MAXIMUM_NB_LOCATIONS_PER_BATCH_WEATHER_GENERATION = 10;
-	private static final int MAXIMUM_NB_LOCATIONS_PER_BATCH_NORMALS = 50;
+	private static int MAXIMUM_NB_LOCATIONS_PER_BATCH_WEATHER_GENERATION = -1; // not set yet
+	private static int MAXIMUM_NB_LOCATIONS_PER_BATCH_NORMALS = -1; // not set yet
 	private static final int MAXIMUM_NB_LOCATIONS_PER_BATCH_REMOVALS = 200;
 	private static int MAXIMUM_NB_LOCATIONS_IN_A_SINGLE_REQUEST = -1; // not set yet
 	
-	private static final String FieldSeparator = ",";
+	static final String FieldSeparator = ",";
 	
 	private static final InetSocketAddress REpiceaAddress = new InetSocketAddress("repicea.dynu.net", 80);
 	private static final InetSocketAddress LocalAddress = new InetSocketAddress("192.168.0.194", 5000);
@@ -66,11 +66,15 @@ public final class BioSimClient {
 
 	private static final String NORMAL_API = "BioSimNormals";
 	private static final String GENERATOR_API = "BioSimWG";
+	private static final String EPHEMERAL_API = "BioSimWGEphemeralMode";
 	private static final String MODEL_API = "BioSimModel";
 	private static final String MODEL_LIST_API = "BioSimModelList";
 	private static final String BIOSIMCLEANUP_API = "BioSimMemoryCleanUp";
 	private static final String BIOSIMMEMORYLOAD_API = "BioSimMemoryLoad";
 	private static final String BIOSIMMAXMEMORY_API = "BioSimMaxMemory";
+	private static final String BIOSIMMAXCOORDINATES = "BioSimMaxCoordinatesPerRequest";
+	private static final String BIOSIMMODELHELP = "BioSimModelHelp";
+	private static final String BIOSIMMODELDEFAULTPARAMETERS = "BioSimModelDefaultParameters";
 
 	protected static final BioSimGeneratedClimateMap GeneratedClimateMap = new BioSimGeneratedClimateMap();
 
@@ -165,12 +169,7 @@ public final class BioSimClient {
 			List<Month> averageOverTheseMonths) throws BioSimClientException, BioSimServerException {
 		LinkedHashMap<BioSimPlot, BioSimDataSet> outputMap = new LinkedHashMap<BioSimPlot, BioSimDataSet>();
 
-		String variablesQuery = getVariablesQuery(Variable.getVariablesForNormals());
-
 		String query = constructCoordinatesQuery(locations);
-
-		query += "&var=" + variablesQuery;
-		query += "&compress=0"; // compression is disabled by default
 		query += "&" + period.parsedQuery;
 
 		if (rcp != null) {
@@ -255,13 +254,13 @@ public final class BioSimClient {
 		if (locations.size() > BioSimClient.getMaxNumberLocationsInSingleRequest()) {
 			throw new BioSimClientException("The maximum number of locations for a single request is " + MAXIMUM_NB_LOCATIONS_IN_A_SINGLE_REQUEST);
 		}
-		if (locations.size() > MAXIMUM_NB_LOCATIONS_PER_BATCH_NORMALS) {
+		if (locations.size() > BioSimClient.getMaximumNbLocationsPerBatchNormals()) {
 			LinkedHashMap<BioSimPlot, BioSimDataSet> resultingMap = new LinkedHashMap<BioSimPlot, BioSimDataSet>();
 			List<BioSimPlot> copyList = new ArrayList<BioSimPlot>();
 			copyList.addAll(locations);
 			List<BioSimPlot> subList = new ArrayList<BioSimPlot>();
 			while (!copyList.isEmpty()) {
-				while (!copyList.isEmpty() && subList.size() < MAXIMUM_NB_LOCATIONS_PER_BATCH_NORMALS) {
+				while (!copyList.isEmpty() && subList.size() < BioSimClient.getMaximumNbLocationsPerBatchNormals()) {
 					subList.add(copyList.remove(0));
 				}
 				resultingMap.putAll(internalCalculationForNormals(period, subList, rcp, climModel, averageOverTheseMonths));
@@ -404,18 +403,82 @@ public final class BioSimClient {
 		}
 	}
 	
-	private static String getVariablesQuery(List<Variable> variables) {		
-		String variablesQuery = "";
-//		List<Variable> variables = Arrays.asList(Variable.values());
-		for (Variable v : variables) {
-			variablesQuery += v.name();
-			if (variables.indexOf(v) < variables.size() - 1) {
-				variablesQuery += SPACE_IN_REQUEST;
-			}
+//	private static String getVariablesQuery(List<Variable> variables) {		
+//		String variablesQuery = "";
+////		List<Variable> variables = Arrays.asList(Variable.values());
+//		for (Variable v : variables) {
+//			variablesQuery += v.name();
+//			if (variables.indexOf(v) < variables.size() - 1) {
+//				variablesQuery += SPACE_IN_REQUEST;
+//			}
+//		}
+//		return variablesQuery;
+//	}
+
+	/**
+	 * Generate climate variable and apply a particular model on these generated variables.
+	 * 
+	 * This method is based on the ephemeral mode. The generated climate variables are not 
+	 * cached.
+	 * 
+	 * @param modelName  the name of the model
+	 * @param teleIORefs a LinkedHashMap with the references to the TeleIO objects on the server
+	 * @param additionalParms a BioSimParameterMap instance that contains the eventual additional parameters for the model
+	 * @return a LinkedHashMap with BioSimPlot instances as keys and a Map with years and climate variables values as values.
+	 * @throws BioSimClientException
+	 */
+	static LinkedHashMap<BioSimPlot, BioSimDataSet> applyModel(int fromYr, 
+			int toYr,
+			List<BioSimPlot> locations,
+			RCP rcp,
+			ClimateModel climModel,
+			int rep,
+			String modelName,
+			BioSimParameterMap additionalParms) throws BioSimClientException, BioSimServerException {
+//		if (!getReferenceModelList().contains(modelName)) {
+//			throw new InvalidParameterException("The model " + modelName
+//					+ " is not a valid model. Please consult the list of models through the function getModelList()");
+//		}
+
+//		LinkedHashMap<BioSimPlot, String> outputMap = new LinkedHashMap<BioSimPlot, String>();
+		
+		String query = constructCoordinatesQuery(locations);
+		query += "&from=" + fromYr;
+		query += "&to=" + toYr;
+		if (rcp != null) {
+			query += "&rcp=" + rcp.getURLString();
 		}
-		return variablesQuery;
+		
+		if(climModel != null) {
+			query += "&climMod=" + climModel.name();
+		}
+		
+		if (ForceClimateGenerationEnabled) {
+			System.out.println("Warning: past climate is generated instead of being compiled from observations!");
+			query += "&source=FromNormals";
+		}
+		
+		if (NbNearestNeighbours != null) {
+			query += "&nb_nearest_neighbor=" + NbNearestNeighbours.toString();
+		}
+		
+		if (rep > 1) {
+			query += "&rep=" + rep;
+		}
+		
+		query += "&model=" + modelName;
+		if (additionalParms != null) {
+			query += "&" + additionalParms.parse();
+		}
+		
+		String serverReply = getStringFromConnection(EPHEMERAL_API, query);
+		LinkedHashMap<BioSimPlot, BioSimDataSet> outputMap = new LinkedHashMap<BioSimPlot, BioSimDataSet>();
+		readLines(serverReply, "rep", locations, outputMap);
+		return outputMap;
 	}
 
+
+	
 	/**
 	 * Generates climate for some locations over a particular time interval.
 	 * 
@@ -436,18 +499,18 @@ public final class BioSimClient {
 			RCP rcp,
 			ClimateModel climModel,
 			int rep) throws BioSimClientException, BioSimServerException {
-		boolean compress = false; // disabling compression by default
+//		boolean compress = false; // disabling compression by default
 		LinkedHashMap<BioSimPlot, String> outputMap = new LinkedHashMap<BioSimPlot, String>();
 
-		String variablesQuery = getVariablesQuery(Arrays.asList(Variable.values()));
+//		String variablesQuery = getVariablesQuery(Arrays.asList(Variable.values()));
 		
 		String query = constructCoordinatesQuery(locations);
-		query += "&var=" + variablesQuery;
-		if (compress) {
-			query += "&compress=1";
-		} else {
-			query += "&compress=0";
-		}
+//		query += "&var=" + variablesQuery;
+//		if (compress) {
+//			query += "&compress=1";
+//		} else {
+//			query += "&compress=0";
+//		}
 		query += "&from=" + fromYr;
 		query += "&to=" + toYr;
 		if (rcp != null) {
@@ -501,8 +564,34 @@ public final class BioSimClient {
 		copy.addAll(getReferenceModelList());
 		return copy;
 	}
+	
+	public static String getModelHelp(String modelName) throws BioSimClientException, BioSimServerException {
+		if (modelName == null) {
+			throw new InvalidParameterException("THe modelName parameter cannot be set to null!");
+		}
+		String serverReply = getStringFromConnection(BIOSIMMODELHELP, "model=" + modelName);
+		return serverReply;
+	}
 
 	
+	public static BioSimParameterMap getModelDefaultParameters(String modelName) throws BioSimClientException, BioSimServerException {
+		if (modelName == null) {
+			throw new InvalidParameterException("THe modelName parameter cannot be set to null!");
+		}
+		String serverReply = getStringFromConnection(BIOSIMMODELDEFAULTPARAMETERS, "model=" + modelName);
+		String[] parms = serverReply.split(FieldSeparator);
+		BioSimParameterMap parmMap = new BioSimParameterMap();
+		for (String parm : parms) {
+			String[] keyValue = parm.split(":");
+			if (keyValue.length > 1) {
+				parmMap.put(keyValue[0], keyValue[1]);
+			} else {
+				parmMap.put(keyValue[0], null);
+			}
+		}
+		return parmMap;
+	}
+
 	private static List<String> getReferenceModelList() throws BioSimClientException, BioSimServerException {
 		if (ReferenceModelList == null) {
 			List<String> myList = new ArrayList<String>();
@@ -535,7 +624,7 @@ public final class BioSimClient {
 			throw new InvalidParameterException("The model " + modelName
 					+ " is not a valid model. Please consult the list of models through the function getModelList()");
 		}
-		boolean compress = false; // disabling compression
+//		boolean compress = false; // disabling compression
 
 		String wgoutQuery = "";
 		List<BioSimPlot> refListForLocations = new ArrayList<BioSimPlot>();
@@ -551,11 +640,11 @@ public final class BioSimClient {
 		LinkedHashMap<BioSimPlot, BioSimDataSet> outputMap = new LinkedHashMap<BioSimPlot, BioSimDataSet>();
 		String query = "";
 		query += "model=" + modelName;
-		if (compress) {
-			query += "&compress=1";
-		} else {
-			query += "&compress=0";
-		}
+//		if (compress) {
+//			query += "&compress=1";
+//		} else {
+//			query += "&compress=0";
+//		}
 		query += "&wgout=" + wgoutQuery;
 		if (additionalParms != null) {
 			query += "&" + additionalParms.parse();
@@ -606,13 +695,62 @@ public final class BioSimClient {
 		}
 	}
 	
-	
+	private static LinkedHashMap<BioSimPlot, BioSimDataSet> internalCalculationForClimateVariables(
+			int fromYr, 
+			int toYr, 
+			List<BioSimPlot> locations,
+			RCP rcp,
+			ClimateModel climMod,
+			String modelName, 
+			int rep,
+			boolean isEphemeral,
+			BioSimParameterMap additionalParms) throws BioSimClientException, BioSimServerException {
+		Map<BioSimPlot, String> alreadyGeneratedClimate = new HashMap<BioSimPlot, String>();
+		List<BioSimPlot> locationsToGenerate = new ArrayList<BioSimPlot>();
+		
+		if (isEphemeral) {
+			locationsToGenerate.addAll(locations);
+			return BioSimClient.applyModel(fromYr, toYr, locationsToGenerate, rcp, climMod, rep, modelName, additionalParms);
+		} else { // here we retrieve what is already available
+			for (BioSimPlot location : locations) {
+				BioSimQuerySignature querySignature = new BioSimQuerySignature(fromYr, toYr, location, rcp, climMod, rep, ForceClimateGenerationEnabled);
+				if (GeneratedClimateMap.containsKey(querySignature)) {
+					alreadyGeneratedClimate.put(location, GeneratedClimateMap.get(querySignature));
+				} else {
+					locationsToGenerate.add(location);
+				}
+			}
+			
+			Map<BioSimPlot, String> generatedClimate = new HashMap<BioSimPlot, String>();
+			if (!locationsToGenerate.isEmpty()) { // here we generate the climate if needed
+				generatedClimate.putAll(BioSimClient.getGeneratedClimate(fromYr, toYr, locationsToGenerate, rcp, climMod, rep));
+				
+				for (BioSimPlot location : generatedClimate.keySet()) {
+					// TODO FP we could avoid creating again a signature here by storing the signature in a map
+					GeneratedClimateMap.put(new BioSimQuerySignature(fromYr, toYr, location, rcp, climMod, rep, ForceClimateGenerationEnabled),		
+							generatedClimate.get(location));
+				}
+			}
+
+			generatedClimate.putAll(alreadyGeneratedClimate);
+
+			LinkedHashMap<BioSimPlot, String> mapForModels = new LinkedHashMap<BioSimPlot, String>();
+			for (BioSimPlot location : locations) {
+				mapForModels.put(location, generatedClimate.get(location));
+			}
+			LinkedHashMap<BioSimPlot, BioSimDataSet> resultingMap = BioSimClient.applyModel(modelName, mapForModels, additionalParms);
+			return resultingMap;
+		}
+
+	}
+
 	/**
-	 * Returns a model output for a particular period. The method involves
-	 * two request to the server. The first aims at generating the climate, whereas
-	 * the second applies a model on the generated climate in order to obtain the 
-	 * desired variables. The "modelname" parameter sets the model to be applied on
-	 * the generated climate. It should be one of the strings returned by the 
+	 * Returns a model output for a particular time interval. The method is based on 
+	 * the ephemeral mode and consequently, the generated climate variables are discarded
+	 * after this method has been run. 
+	 * 
+	 * The "modelname" argument sets the model to be applied on
+	 * the generated climate variables. It should be one of the strings returned by the 
 	 * getModelList static method. Generating the climate is time consuming. The 
 	 * generated climate is stored on the server and it can be re used with some 
 	 * other models. 
@@ -636,26 +774,27 @@ public final class BioSimClient {
 			String modelName,
 			int rep,
 			BioSimParameterMap additionalParms)	throws BioSimClientException, BioSimServerException {
-		return BioSimClient.getModelOutput(fromYr, toYr, locations, rcp, climMod, modelName, rep, false, additionalParms);
+		return BioSimClient.getModelOutput(fromYr, toYr, locations, rcp, climMod, modelName, rep, true, additionalParms); // ephemeral mode enabled
 	}
 
 	
 	/**
-	 * Returns a model output for a particular period. The method involves
-	 * two request to the server. The first aims at generating the climate, whereas
-	 * the second applies a model on the generated climate in order to obtain the 
-	 * desired variables. The "modelname" parameter sets the model to be applied on
+	 * Returns a model output for a particular time interval. The method is based on 
+	 * the ephemeral mode and consequently, the generated climate variables are discarded
+	 * after this method has been run. 
+	 * 
+	 * The "modelname" parameter sets the model to be applied on
 	 * the generated climate. It should be one of the strings returned by the 
 	 * getModelList static method. Generating the climate is time consuming. The 
 	 * generated climate is stored on the server and it can be re used with some 
-	 * other models. The number of replicates is set to 1 here.
+	 * other models. The number of replicate is set to 1.
 	 * 
 	 * @param fromYr starting date (yr) of the period (inclusive)
 	 * @param toYr ending date (yr) of the period (inclusive)
 	 * @param locations the locations of the plots (BioSimPlot instances)
+	 * @param modelName a string representing the model name
 	 * @param rcp an RCP enum variable (by default RCP 4.5)
 	 * @param climMod a ClimateModel enum variable (by default RCM 4)
-	 * @param modelName a string representing the model name
 	 * @param additionalParms a BioSimParameterMap instance that contains the eventual additional parameters for the model
 	 * @return a LinkedHashMap of BioSimPlot instances (keys) and climate variables (values)
 	 * @throws BioSimClientException if the client fails or BioSimServerException if the server fails
@@ -668,74 +807,25 @@ public final class BioSimClient {
 			String modelName,
 			BioSimParameterMap additionalParms)
 			throws BioSimClientException, BioSimServerException {
-		return BioSimClient.getModelOutput(fromYr, toYr, locations, rcp, climMod, modelName, 1, false, additionalParms);
+		return BioSimClient.getModelOutput(fromYr, toYr, locations, rcp, climMod, modelName, 1, true, additionalParms);
 	}
 
 	
 	
-	private static LinkedHashMap<BioSimPlot, BioSimDataSet> internalCalculationForClimateVariables(
-			int fromYr, 
-			int toYr, 
-			List<BioSimPlot> locations,
-			RCP rcp,
-			ClimateModel climMod,
-			String modelName, 
-			int rep,
-			boolean isEphemeral,
-			BioSimParameterMap additionalParms) throws BioSimClientException, BioSimServerException {
-		Map<BioSimPlot, String> alreadyGeneratedClimate = new HashMap<BioSimPlot, String>();
-		List<BioSimPlot> locationsToGenerate = new ArrayList<BioSimPlot>();
-
-		if (isEphemeral) {
-			locationsToGenerate.addAll(locations);
-		} else { // here we retrieve what is already available
-			for (BioSimPlot location : locations) {
-				BioSimQuerySignature querySignature = new BioSimQuerySignature(fromYr, toYr, location, rcp, climMod, rep, ForceClimateGenerationEnabled);
-				if (GeneratedClimateMap.containsKey(querySignature)) {
-					alreadyGeneratedClimate.put(location, GeneratedClimateMap.get(querySignature));
-				} else {
-					locationsToGenerate.add(location);
-				}
-			}
-		}
-
-		Map<BioSimPlot, String> generatedClimate = new HashMap<BioSimPlot, String>();
-		if (!locationsToGenerate.isEmpty()) { // here we generate the climate if needed
-			generatedClimate.putAll(BioSimClient.getGeneratedClimate(fromYr, toYr, locationsToGenerate, rcp, climMod, rep));
-			
-			if (!isEphemeral) { // then we stored the reference in the static map for future use
-				for (BioSimPlot location : generatedClimate.keySet()) {
-					// TODO FP we could avoid creating again a signature here by storing the signature in a map
-					GeneratedClimateMap.put(new BioSimQuerySignature(fromYr, toYr, location, rcp, climMod, rep, ForceClimateGenerationEnabled),		
-							generatedClimate.get(location));
-				}
-			}
-		}
-
-		generatedClimate.putAll(alreadyGeneratedClimate);
-
-		LinkedHashMap<BioSimPlot, String> mapForModels = new LinkedHashMap<BioSimPlot, String>();
-		for (BioSimPlot location : locations) {
-			mapForModels.put(location, generatedClimate.get(location));
-		}
-		LinkedHashMap<BioSimPlot, BioSimDataSet> resultingMap = BioSimClient.applyModel(modelName, mapForModels, additionalParms);
-		if (isEphemeral) { // then we remove the wgout instances stored on the server
-			BioSimClient.removeWgoutObjectsFromServer(generatedClimate.values());
-		}
-		return resultingMap;
-	}
 
 	/**
-	 * Returns a model output for a particular period. The method involves
+	 * Returns a model output for a particular period. In this method, the ephemeral 
+	 * mode can be disabled by setting the argument isEphemeral to false. In such 
+	 * a case, the generated climate is cached in memory. This involves
 	 * two request to the server. The first aims at generating the climate, whereas
 	 * the second applies a model on the generated climate in order to obtain the 
-	 * desired variables. The "modelname" parameter sets the model to be applied on
-	 * the generated climate. It should be one of the strings returned by the 
-	 * getModelList static method. Generating the climate is time consuming. So there
-	 * is a procedure to avoid generating the climate twice for the same location. The
-	 * "isEphemeral" parameter actually overrides this procedure if it is set to true.
-	 * Otherwise, the generated climate is stored on the server and it can be re used 
-	 * with some other models.
+	 * desired variables. The ephemeral model should be preferred when a single model
+	 * is to be applied to some locations. If several models are to be applied to the
+	 * some locations, then the ephemeral mode should be disabled. The climate is then
+	 * generated only once for all the models. This implies several calls to this method
+	 * with exactly the same signature except for the argument "modelName". This "modelName"
+	 * argument sets the model to be applied on the generated climate. It should be one 
+	 * of the strings returned by the getModelList static method. 
 	 * 
 	 * @param fromYr starting date (yr) of the period (inclusive)
 	 * @param toYr ending date (yr) of the period (inclusive)
@@ -764,13 +854,13 @@ public final class BioSimClient {
 		if (locations.size() > BioSimClient.getMaxNumberLocationsInSingleRequest()) {
 			throw new BioSimClientException("The maximum number of locations for a single request is " + MAXIMUM_NB_LOCATIONS_IN_A_SINGLE_REQUEST);
 		}
-		if (locations.size() > MAXIMUM_NB_LOCATIONS_PER_BATCH_WEATHER_GENERATION) {
+		if (locations.size() > BioSimClient.getMaximumNbLocationsPerBatchWeatherGeneration()) {
 			LinkedHashMap<BioSimPlot, BioSimDataSet> resultingMap = new LinkedHashMap<BioSimPlot, BioSimDataSet>();
 			List<BioSimPlot> copyList = new ArrayList<BioSimPlot>();
 			copyList.addAll(locations);
 			List<BioSimPlot> subList = new ArrayList<BioSimPlot>();
 			while (!copyList.isEmpty()) {
-				while (!copyList.isEmpty() && subList.size() < MAXIMUM_NB_LOCATIONS_PER_BATCH_WEATHER_GENERATION) {
+				while (!copyList.isEmpty() && subList.size() < BioSimClient.getMaximumNbLocationsPerBatchWeatherGeneration()) {
 					subList.add(copyList.remove(0));
 				}
 				resultingMap.putAll(internalCalculationForClimateVariables(fromYr, toYr, subList, rcp, climMod, modelName, rep, isEphemeral, additionalParms));
@@ -781,43 +871,31 @@ public final class BioSimClient {
 			return internalCalculationForClimateVariables(fromYr, toYr, locations, rcp, climMod, modelName, rep, isEphemeral, additionalParms);
 		}
 	}
-
-	/**
-	 * Returns a model output for a particular period. The method involves
-	 * two request to the server. The first aims at generating the climate, whereas
-	 * the second applies a model on the generated climate in order to obtain the 
-	 * desired variables. The "modelname" parameter sets the model to be applied on
-	 * the generated climate. It should be one of the strings returned by the 
-	 * getModelList static method. Generating the climate is time consuming. So there
-	 * is a procedure to avoid generating the climate twice for the same location. The
-	 * "isEphemeral" parameter actually overrides this procedure if it is set to true.
-	 * Otherwise, the generated climate is stored on the server and it can be re used 
-	 * with some other models. The number of replicates is set to 1 here.
-	 * 
-	 * @param fromYr starting date (yr) of the period (inclusive)
-	 * @param toYr ending date (yr) of the period (inclusive)
-	 * @param locations the locations of the plots (BioSimPlot instances)
-	 * @param rcp an RCP enum variable (by default RCP 4.5)
-	 * @param climMod a ClimateModel enum variable (by default RCM 4)
-	 * @param modelName a string representing the model name
-	 * @param isEphemeral a boolean that overrides the storage procedure on the server
-	 * @param additionalParms a BioSimParameterMap instance that contains the eventual additional parameters for the model
-	 * @return a LinkedHashMap of BioSimPlot instances (keys) and climate variables (values)
-	 * @throws BioSimClientException if the client fails or BioSimServerException if the server fails
-	 */
-	public static LinkedHashMap<BioSimPlot, BioSimDataSet> getModelOutput(int fromYr, 
-			int toYr,
-			List<BioSimPlot> locations, 
-			RCP rcp,
-			ClimateModel climMod,
-			String modelName,
-			boolean isEphemeral,
-			BioSimParameterMap additionalParms) throws BioSimClientException, BioSimServerException {
-		return getModelOutput(fromYr, toYr, locations, rcp, climMod, modelName, 1, isEphemeral, additionalParms);
+	
+	
+	private static int getMaximumNbLocationsPerBatchWeatherGeneration() throws BioSimClientException, BioSimServerException {
+		setMaxCapacities();
+		return MAXIMUM_NB_LOCATIONS_PER_BATCH_WEATHER_GENERATION;
 	}
 
+	private static void setMaxCapacities() throws BioSimClientException, BioSimServerException {
+		if (MAXIMUM_NB_LOCATIONS_PER_BATCH_WEATHER_GENERATION == -1 || MAXIMUM_NB_LOCATIONS_PER_BATCH_NORMALS == -1) {
+			String serverReply = getStringFromConnection(BIOSIMMAXCOORDINATES, null);
+			try {
+				String[] maxCapacities = serverReply.split(FieldSeparator);
+				MAXIMUM_NB_LOCATIONS_PER_BATCH_NORMALS = Integer.parseInt(maxCapacities[0]);
+				MAXIMUM_NB_LOCATIONS_PER_BATCH_WEATHER_GENERATION = Integer.parseInt(maxCapacities[1]);
+			} catch (NumberFormatException e) {
+				throw new BioSimClientException("The server reply could not be parsed: " + e.getMessage());
+			}
+		}
+	}
 	
-	
+	private static int getMaximumNbLocationsPerBatchNormals() throws BioSimClientException, BioSimServerException {
+		setMaxCapacities();
+		return MAXIMUM_NB_LOCATIONS_PER_BATCH_NORMALS;
+	}
+
 	/**
 	 * Reset the configuration to its initial values.
 	 */
@@ -871,17 +949,10 @@ public final class BioSimClient {
 		}
 	}
 	
+	public static void main(String[] args) throws BioSimClientException, BioSimServerException {
+//		List<String> modelList = BioSimClient.getModelList();
+//		System.out.print(BioSimClient.getModelDefaultParameters(modelList.get(0)));
+		System.out.print(BioSimClient.getModelDefaultParameters("Spruce_Budworm_Biology"));
+	}
 	
-
-//	public static void main(String[] args) throws BioSimClientException {
-////		List<String> references = new ArrayList<String>();
-////		for (int i = 0; i < 402; i++) {
-////			references.add("" + i);
-////		}			
-////		
-////		BioSimClient.removeWgoutObjectsFromServer(references);
-//		List<String> models = BioSimClient.getModelList();
-//		for (String model : models)
-//			System.out.println(model);
-//	}
 }

@@ -129,7 +129,7 @@ test_that("Testing growing season between 1994 and 2004 for Quebec and Sorel can
   expect_equal(abs(growingSeason[which(growingSeason$id == "Sorel" & growingSeason$Year == 2002),"Length"] - 173) < 1E-4, TRUE)
 })
 
-degreeDays <- getModelOutput(2017, 2021, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, "DegreeDay_Annual", T, rcp = "RCP85", climModel = "GCM4")
+degreeDays <- getModelOutput(2017, 2021, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, "DegreeDay_Annual", rcp = "RCP85", climModel = "GCM4")
 
 test_that("Testing degree-days between 2017 and 2021 under RCP 8.5 and climate model GCM4 for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2017),"DD"] - 2840.05) < 1E-4, TRUE)
@@ -144,7 +144,7 @@ test_that("Testing degree-days between 2017 and 2021 under RCP 8.5 and climate m
   expect_equal(abs(degreeDays[which(degreeDays$id == "Sorel" & degreeDays$Year == 2021),"DD"] - 3479.20) < 1E-4, FALSE)
 })
 
-degreeDays <- getModelOutput(2017, 2018, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, "DegreeDay_Annual", T, additionalParms = c("LowerThreshold"=5))
+degreeDays <- getModelOutput(2017, 2018, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, "DegreeDay_Annual", additionalParms = c("LowerThreshold"=5))
 
 test_that("Testing degree-days above 5C in 2017 and 2018 can be properly retrieved", {
   expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2017),"DD"] - 1789.10) < 1E-4, TRUE)
@@ -155,7 +155,7 @@ test_that("Testing degree-days above 5C in 2017 and 2018 can be properly retriev
 
 
 biosimclient.config(forceClimateGenerationEnabled = T)
-degreeDays <- getModelOutput(2017, 2018, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, "DegreeDay_Annual", T, additionalParms = c("LowerThreshold"=5))
+degreeDays <- getModelOutput(2017, 2018, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, "DegreeDay_Annual", additionalParms = c("LowerThreshold"=5))
 
 test_that("Testing degree-days above 5C in 2017 and 2018 are generated and not compiled from observations", {
   expect_equal(abs(degreeDays[which(degreeDays$id == "Quebec" & degreeDays$Year == 2017),"DD"] - 1789.10) > 1E-4, TRUE)
@@ -167,12 +167,25 @@ biosimclient.config()  ### reset the configuration
 
 
 biosimclient.config(nbNearestNeighbours = 20)
-degreeDays <- getModelOutput(2017, 2018, "lostSomewhere", 50, -70, 300, "DegreeDay_Annual", T, additionalParms = c("LowerThreshold"=5))
+degreeDays <- getModelOutput(2017, 2018, "lostSomewhere", 50, -70, 300, "DegreeDay_Annual", additionalParms = c("LowerThreshold"=5))
 test_that("Testing degree-days above 5C in 2017 and 2018 are generated and not compiled from observations", {
   expect_equal(abs(degreeDays[which(degreeDays$id == "lostSomewhere" & degreeDays$Year == 2017),"DD"] - 1174.95) > 1E-4, TRUE)
   expect_equal(abs(degreeDays[which(degreeDays$id == "lostSomewhere" & degreeDays$Year == 2018),"DD"] - 1206.15) > 1E-4, TRUE)
 })
 biosimclient.config()  ### reset the configuration
+
+
+addParms <- getModelDefaultParameters("DegreeDay_Annual")
+test_that("Testing default parameters are returned", {
+  expect_equal(length(addParms), 8)
+})
+
+dd <- getModelOutput(2017, 2018, "lostSomewhere", 50, -70, 300, "DegreeDay_Annual", additionalParms = addParms)
+test_that("Testing degree-days above 5C in 2017 and 2018 are generated and not compiled from observations", {
+  expect_equal(length(dd[,1]), 2)
+  expect_equal(dd[which(dd$id == "lostSomewhere" & dd$Year == 2017),"DD"], 2105.40)
+  expect_equal(dd[which(dd$id == "lostSomewhere" & dd$Year == 2018),"DD"], 2000.85)
+})
 
 
 shutdownJava()
