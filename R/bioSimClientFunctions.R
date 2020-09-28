@@ -171,6 +171,57 @@ getModelList <- function() {
   return(J4R::getAllValuesFromListObject(J4R::callJavaMethod("biosimclient.BioSimClient", "getModelList")))
 }
 
+#'
+#' Provide help for a particular model
+#'
+#' @param modelName should be one of the character string returned by the getModelList function
+#'
+#' @examples
+#'
+#' \dontrun{
+#' getModelHelp("Spruce_Budworm_Biology")}
+#'
+#' @export
+getModelHelp <- function(modelName) {
+  .connectToBioSIMClient()
+  return(cat(J4R::callJavaMethod("biosimclient.BioSimClient", "getModelHelp", modelName)))
+}
+
+#'
+#' Provide help for a particular model
+#'
+#' @param modelName should be one of the character string returned by the getModelList function
+#'
+#' @examples
+#'
+#' \dontrun{
+#' getModelHelp("Spruce_Budworm_Biology")}
+#'
+#' @export
+getModelDefaultParameters <- function(modelName) {
+  .connectToBioSIMClient()
+  defParms <- J4R::callJavaMethod("biosimclient.BioSimClient", "getModelDefaultParameters", modelName)
+  str <- defParms$toString()
+  strSplit <- strsplit(str, ",")[[1]]
+  keys <- c()
+  values <- c()
+  for (ch in strSplit) {
+    print(ch)
+    strSubsplit <- strsplit(ch, ":")[[1]]
+    keys <- c(keys, strSubsplit[1])
+    if (length(strSubsplit) > 1) {
+      value <- strSubsplit[2]
+    } else {
+      value <- ""
+    }
+    values <- c(values, value)
+  }
+  names(values) <- keys
+  return(values)
+}
+
+
+
 
 .formatDataFrame <- function(listOfPlots, maps, id) {
   latDeg <- listOfPlots$getLatitudeDeg()
@@ -234,7 +285,7 @@ getModelList <- function() {
 #'                              F, rcp = "RCP85", climModel = "GCM4", additionalParms = addParms)}
 #'
 #' @export
-getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, isEphemeral = F, rep = 1, rcp = "RCP45", climModel = "RCM4", additionalParms = NULL) {
+getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, isEphemeral = T, rep = 1, rcp = "RCP45", climModel = "RCM4", additionalParms = NULL) {
   # For debugging
   # fromYr <- 1998
   # toYr <- 2006
