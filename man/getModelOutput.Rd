@@ -12,7 +12,7 @@ getModelOutput(
   longDeg,
   elevM,
   modelName,
-  isEphemeral = F,
+  isEphemeral = T,
   rep = 1,
   rcp = "RCP45",
   climModel = "RCM4",
