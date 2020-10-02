@@ -237,14 +237,14 @@ getModelDefaultParameters <- function(modelName) {
     }
     data.i <- maps$get(plot)
     data.i <- .convertJavaDataSetIntoDataFrame(data.i)
-    data.i$id <- id[i]
-    data.i$latDeg <- latDeg[i]
-    data.i$longDeg <- longDeg[i]
-    data.i$elevM <- elevM[i]
+    data.i$KeyID <- id[i]
+    data.i$Latitude <- latDeg[i]
+    data.i$Longitude <- longDeg[i]
+    data.i$Elevation <- elevM[i]
     outputDataFrame <- rbind(outputDataFrame, data.i)
   }
 
-  firstFields <- c("id", "latDeg", "longDeg", "elevM")
+  firstFields <- c("KeyID", "Latitude", "Longitude", "Elevation")
   fieldnames <- colnames(outputDataFrame)
   fieldnames <- c(firstFields, fieldnames[which(!(fieldnames %in% firstFields))])
 
