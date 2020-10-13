@@ -66,7 +66,7 @@ public final class BioSimClient {
 
 	private static final String NORMAL_API = "BioSimNormals";
 	private static final String GENERATOR_API = "BioSimWG";
-	private static final String EPHEMERAL_API = "BioSimWGEphemeralMode";
+	private static final String EPHEMERAL_API = "BioSimModelEphemeral";
 	private static final String MODEL_API = "BioSimModel";
 	private static final String MODEL_LIST_API = "BioSimModelList";
 	private static final String BIOSIMCLEANUP_API = "BioSimMemoryCleanUp";
@@ -435,13 +435,6 @@ public final class BioSimClient {
 			int rep,
 			String modelName,
 			BioSimParameterMap additionalParms) throws BioSimClientException, BioSimServerException {
-//		if (!getReferenceModelList().contains(modelName)) {
-//			throw new InvalidParameterException("The model " + modelName
-//					+ " is not a valid model. Please consult the list of models through the function getModelList()");
-//		}
-
-//		LinkedHashMap<BioSimPlot, String> outputMap = new LinkedHashMap<BioSimPlot, String>();
-		
 		String query = constructCoordinatesQuery(locations);
 		query += "&from=" + fromYr;
 		query += "&to=" + toYr;
@@ -883,8 +876,8 @@ public final class BioSimClient {
 			String serverReply = getStringFromConnection(BIOSIMMAXCOORDINATES, null);
 			try {
 				String[] maxCapacities = serverReply.split(FieldSeparator);
-				MAXIMUM_NB_LOCATIONS_PER_BATCH_NORMALS = Integer.parseInt(maxCapacities[0]);
-				MAXIMUM_NB_LOCATIONS_PER_BATCH_WEATHER_GENERATION = Integer.parseInt(maxCapacities[1]);
+				MAXIMUM_NB_LOCATIONS_PER_BATCH_WEATHER_GENERATION = Integer.parseInt(maxCapacities[0]);
+				MAXIMUM_NB_LOCATIONS_PER_BATCH_NORMALS = Integer.parseInt(maxCapacities[1]);
 			} catch (NumberFormatException e) {
 				throw new BioSimClientException("The server reply could not be parsed: " + e.getMessage());
 			}
