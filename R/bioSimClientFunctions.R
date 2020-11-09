@@ -120,7 +120,7 @@ getNormals <- function(period, id, latDeg, longDeg, elevM, averageOverTheseMonth
 #'
 #' locations <- BioSIM::twoLocationsInSouthernQuebec
 #' \dontrun{
-#' annualNormals <- getAnnualNormals("1981_2010", variables, locations$Name, locations$Latitude,
+#' annualNormals <- getAnnualNormals("1981_2010", locations$Name, locations$Latitude,
 #'                                      locations$Longitude, locations$Elevation)}
 #'
 #' @export

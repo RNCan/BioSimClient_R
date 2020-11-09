@@ -191,7 +191,11 @@ test_that("Testing degree-days above 5C in 2017 and 2018 are generated and not c
 })
 
 
+biosimclient.config(forceClimateGenerationEnabled = T, nbNearestNeighbours = 4)
+ClimaticQc_Annual <- getModelOutput(1981, 2010, locations$Name, locations$Latitude, locations$Longitude,
+                                    locations$Elevation, "ClimaticQc_Annual", rep=2)
+test_that("Testing that we get 120 observations", {
+  expect_equal(length(ClimaticQc_Annual[,1]), 120)
+})
+
 shutdownJava()
-
-
-
