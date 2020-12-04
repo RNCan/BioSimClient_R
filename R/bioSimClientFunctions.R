@@ -269,6 +269,7 @@ getModelDefaultParameters <- function(modelName) {
 #' computational burden and inconsistencies if different models are applied on the same locations. By default, it is set to
 #' true.
 #' @param rep number of replicates of generated climate (is set to 1 by default)
+#' @param repModel number of replicates on the model end (is set to 1 by default)
 #' @param rcp an representative concentration pathway (either "RCP45" or "RCP85")
 #' @param climModel a climatic model (either "RCM4", "GCM4" or "Hadley")
 #' @param additionalParms a named vector with the additional parameters if needed
@@ -282,10 +283,10 @@ getModelDefaultParameters <- function(modelName) {
 #' \dontrun{
 #' degreeDays <- getModelOutput(2017, 2021, locations$Name, locations$Latitude,
 #'                              locations$Longitude, locations$Elevation, "DegreeDay_Annual",
-#'                              F, rcp = "RCP85", climModel = "GCM4", additionalParms = addParms)}
+#'                              rcp = "RCP85", climModel = "GCM4", additionalParms = addParms)}
 #'
 #' @export
-getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, isEphemeral = T, rep = 1, rcp = "RCP45", climModel = "RCM4", additionalParms = NULL) {
+getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, isEphemeral = T, rep = 1, repModel = 1, rcp = "RCP45", climModel = "RCM4", additionalParms = NULL) {
   # For debugging
   # fromYr <- 1998
   # toYr <- 2006
@@ -328,6 +329,7 @@ getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, 
                       jClimModel,
                       modelName,
                       as.integer(rep),
+                      as.integer(repModel),
                       isEphemeral,
                       jAdditionalParms)
   listOfPlots <- J4R::getAllValuesFromListObject(jPlots)
