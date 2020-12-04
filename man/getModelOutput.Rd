@@ -14,6 +14,7 @@ getModelOutput(
   modelName,
   isEphemeral = T,
   rep = 1,
+  repModel = 1,
   rcp = "RCP45",
   climModel = "RCM4",
   additionalParms = NULL
@@ -40,6 +41,8 @@ true.}
 
 \item{rep}{number of replicates of generated climate (is set to 1 by default)}
 
+\item{repModel}{number of replicates on the model end (is set to 1 by default)}
+
 \item{rcp}{an representative concentration pathway (either "RCP45" or "RCP85")}
 
 \item{climModel}{a climatic model (either "RCM4", "GCM4" or "Hadley")}
@@ -60,6 +63,6 @@ addParms <- c("LowerThreshold"=5)
 \dontrun{
 degreeDays <- getModelOutput(2017, 2021, locations$Name, locations$Latitude,
                              locations$Longitude, locations$Elevation, "DegreeDay_Annual",
-                             F, rcp = "RCP85", climModel = "GCM4", additionalParms = addParms)}
+                             rcp = "RCP85", climModel = "GCM4", additionalParms = addParms)}
 
 }

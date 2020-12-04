@@ -197,5 +197,40 @@ ClimaticQc_Annual <- getModelOutput(1981, 2010, locations$Name, locations$Latitu
 test_that("Testing that we get 120 observations", {
   expect_equal(length(ClimaticQc_Annual[,1]), 120)
 })
+biosimclient.config()
+
+
+annualMean <- getAnnualNormals("1981_2010", locations$Name, locations$Latitude, locations$Longitude, locations$Elevation)
+biosimclient.config(forceClimateGenerationEnabled = T)
+ClimaticQc_Annual <- getModelOutput(1981, 2010,
+                                    locations$Name,
+                                    locations$Latitude,
+                                    locations$Longitude,
+                                    locations$Elevation,
+                                    "ClimaticQc_Annual",
+                                    rep=10)
+biosimclient.config()
+
+ClimaticQc_Annual_moy <- aggregate(ClimaticQc_Annual[, c(8,11,13)], list(ClimaticQc_Annual$KeyID), mean)
+colnames(ClimaticQc_Annual_moy) <- c("KeyID", "P", "TN", "TX")
+
+test_that("Testing that temperatures do not differ by more than 0.1 C", {
+  expect_equal(any(abs(ClimaticQc_Annual_moy[,c("TN", "TX")] - annualMean[,c("TN", "TX")]) > 0.2), FALSE)
+})
+
+test_that("Testing that precipitation does not differ by more than 50mm", {
+  expect_equal(any(abs(ClimaticQc_Annual_moy[,c("P")] - annualMean[,c("P")]) > 50), FALSE)
+})
+
+
+biosimclient.config(forceClimateGenerationEnabled = T)
+ClimaticQc_Annual <- getModelOutput(1981, 2010, locations$Name, locations$Latitude, locations$Longitude,
+                                    locations$Elevation, "ClimaticQc_Annual", rep=2, repModel=2)
+test_that("Testing that we get 240 observations when simulating 2 locations x 30 years x 2rep x 2repModel", {
+  expect_equal(length(ClimaticQc_Annual[,1]), 240)
+})
+biosimclient.config()
+
+
 
 shutdownJava()

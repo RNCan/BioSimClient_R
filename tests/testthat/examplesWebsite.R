@@ -33,7 +33,7 @@ degreeDays <- getModelOutput(2017, 2021, locations$Name, locations$Latitude, loc
 degreeDays
 
 MPB_SLR <- getModelOutput(2017, 2021, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, "MPB_SLR", F, rcp = "RCP85", climModel = "GCM4")
-
+MPB_SLR
 
 
 shutdownJava()
