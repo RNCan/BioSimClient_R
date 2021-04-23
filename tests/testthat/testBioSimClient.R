@@ -13,6 +13,28 @@
 
 library(BioSIM)
 
+output <- getModelOutput(fromYr = 1990, toYr = 1990, id="Reservoir Gouin", latDeg = 48.5, longDeg = -74.5, elevM = NA, modelName = "DegreeDay_Annual")
+
+test_that("Testing that one elevation with NA are properly processed", {
+  expect_equal(output$DD, 2200.30, tolerance = 1E-8)
+})
+
+output <- getModelOutput(fromYr = 1990, toYr = 1990, id=c("Reservoir Gouin", "fake1", "fake2"), latDeg = c(48.5,49,50), longDeg = c(-74.5,-73,-72), elevM = c(300,NA,200), modelName = "DegreeDay_Annual")
+
+test_that("Testing that one elevation among others with NA are properly processed", {
+  expect_equal(output[1,"DD"], 2299.15, tolerance = 1E-8)
+  expect_equal(output[2,"DD"], 2258.50, tolerance = 1E-8)
+  expect_equal(output[3,"DD"], 2210.40, tolerance = 1E-8)
+})
+
+output <- getModelOutput(fromYr = 1990, toYr = 1990, id=c("Reservoir Gouin", "fake1", "fake2"), latDeg = c(48.5,49,50), longDeg = c(-74.5,-73,-72), elevM = c(NA,NA,NA), modelName = "DegreeDay_Annual")
+
+test_that("Testing that all the elevations with NA are properly processed", {
+  expect_equal(output[1,"DD"], 2200.30, tolerance = 1E-8)
+  expect_equal(output[2,"DD"], 2258.50, tolerance = 1E-8)
+  expect_equal(output[3,"DD"], 1990.80, tolerance = 1E-8)
+})
+
 locations <- BioSIM::twoLocationsInSouthernQuebec
 print(locations)
 
@@ -135,7 +157,7 @@ test_that("Testing degree-days between 2017 and 2021 under RCP 8.5 and climate m
   expect_equal(abs(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2017),"DD"] - 2840.05) < 1E-4, TRUE)
   expect_equal(abs(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2018),"DD"] - 2731.65) < 1E-4, TRUE)
   expect_equal(abs(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2019),"DD"] - 2599.75) < 1E-4, TRUE)
-  expect_equal(abs(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2020),"DD"] - 2800.15) < 1E-4, TRUE)
+  expect_equal(abs(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2020),"DD"] - 2781.10) < 1E-4, TRUE)
   expect_equal(abs(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2021),"DD"] - 2912.65) < 1E-4, FALSE)
   expect_equal(abs(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2017),"DD"] - 3552.60) < 1E-4, TRUE)
   expect_equal(abs(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2018),"DD"] - 3454.60) < 1E-4, TRUE)

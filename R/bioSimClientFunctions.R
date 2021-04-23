@@ -25,15 +25,15 @@
 allMonths <- c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
 
 .createBioSimPlots <- function(latDeg, longDeg, elevM) {
-  if (length(latDeg) == length(longDeg)) {
-    if (length(latDeg) == length(elevM)) {
-      jList <- J4R::createJavaObject("java.util.ArrayList")
-      jPlots <- J4R::createJavaObject("biosimclient.BioSimPlotImpl", latDeg, longDeg, elevM)
-      jList$add(jPlots)
-      return(jList)
-    }
-  }
-  stop("createBioSimPlots: The arguments of the function are not of the same length!")
+#  if (length(latDeg) == length(longDeg)) {
+#    if (length(latDeg) == length(elevM)) {
+  jList <- J4R::createJavaObject("java.util.ArrayList")
+  jPlots <- J4R::createJavaObject("biosimclient.BioSimPlotImpl", latDeg, longDeg, elevM)
+  jList$add(jPlots)
+  return(jList)
+#    }
+#  }
+#  stop("createBioSimPlots: The arguments of the function are not of the same length!")
 }
 
 
@@ -70,9 +70,10 @@ getNormals <- function(period, id, latDeg, longDeg, elevM, averageOverTheseMonth
   # latDeg <- locations$latDeg
   # longDeg <- locations$longDeg
   # elevM <- locations$elevM
-  if (length(id) != length(latDeg)) {
-    stop("The arguments id, latDeg, longDeg and elevM must have the same length!")
-  }
+  elevM <- .checkInputAndFormatIfNeeded(id, latDeg, longDeg, elevM)
+  # if (length(id) != length(latDeg)) {
+  #   stop("The arguments id, latDeg, longDeg and elevM must have the same length!")
+  # }
   if (!is.null(averageOverTheseMonths) && length(averageOverTheseMonths) > 0) {
     for (month in averageOverTheseMonths) {
       if (!(month %in% allMonths)) {
@@ -251,6 +252,27 @@ getModelDefaultParameters <- function(modelName) {
   return(outputDataFrame[,fieldnames])
 }
 
+.checkInputAndFormatIfNeeded <- function(id, latDeg, longDeg, elevM) {
+  if (is.null(id) | is.null(latDeg) | is.null(longDeg) | is.null(elevM)) {
+    stop("The arguments id, latDeg, longDeg and elevM must be non null!")
+  }
+  lengths <- c(length(id), length(latDeg), length(longDeg), length(elevM))
+  if (any(lengths) == 0) {
+    stop("The arguments id, latDeg, longDeg and elevM must have at least one element!")
+  }
+  if (any(lengths - mean(lengths) != 0)) {
+    stop("The arguments id, latDeg, longDeg and elevM must have the same length!")
+  }
+  indexNa <- which(is.na(elevM))
+  if (length(indexNa) > 0) {
+    elevM[indexNa] <- NaN
+  }
+  classes <- c(class(latDeg), class(longDeg), class(elevM))
+  if (any(classes != "numeric")) {
+    stop("The arguments latDeg, longDeg and elevM must be numerics!")
+  }
+  return(elevM)
+}
 
 #'
 #' Generate climate and apply a model.
@@ -296,10 +318,11 @@ getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, 
   # elevM <- locations$elevM
   # modelName <- "DegreeDay_Annual"
   # isEphemeral <- F
-  .connectToBioSIMClient()
-  if (length(id) != length(latDeg)) {
-    stop("The arguments id, latDeg, longDeg and elevM must have the same length!")
-  }
+  elevM <- .checkInputAndFormatIfNeeded(id, latDeg, longDeg, elevM)
+
+  # if (length(id) != length(latDeg)) {
+  #   stop("The arguments id, latDeg, longDeg and elevM must have the same length!")
+  # }
   if (!is.null(additionalParms)) {
     if (is.null(names(additionalParms))) {
       stop("The vector additionalParms must be a named vector!")
@@ -307,6 +330,7 @@ getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, 
       stop("The names in the named vector must be unique!")
     }
   }
+  .connectToBioSIMClient()
   jPlots <- .createBioSimPlots(latDeg, longDeg, elevM)
   jRCP <- J4R::createJavaObject("biosimclient.BioSimEnums$RCP", rcp)
   jClimModel <- J4R::createJavaObject("biosimclient.BioSimEnums$ClimateModel", climModel)
