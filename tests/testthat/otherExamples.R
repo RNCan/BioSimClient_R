@@ -75,3 +75,16 @@ ggplot() +
   ylab("Temperature") +
   xlab("Julian date")
 
+
+latDeg <- runif(n = 1000, min=48, max=51)
+longDeg <- runif(n = 1000, min=-76, max=-66)
+ids <- paste(rep("plot",1000),1:100,sep="")
+require(BioSIM)
+getModelList()
+system.time({
+  test1 <- getModelOutput(fromYr = 1999, toYr = 2000, id = ids, latDeg, longDeg, modelName = "DegreeDay_Annual")
+})
+system.time({
+  test2 <- getModelOutput(fromYr = 1999, toYr = 2000, id = ids, latDeg, longDeg, modelName = "DegreeDay_Annual", alternativeMethod = T)
+})
+shutdownJava()
