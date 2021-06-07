@@ -82,9 +82,9 @@ ids <- paste(rep("plot",1000),1:100,sep="")
 require(BioSIM)
 getModelList()
 system.time({
-  test1 <- getModelOutput(fromYr = 1999, toYr = 2000, id = ids, latDeg, longDeg, modelName = "DegreeDay_Annual")
-})
-system.time({
-  test2 <- getModelOutput(fromYr = 1999, toYr = 2000, id = ids, latDeg, longDeg, modelName = "DegreeDay_Annual", alternativeMethod = T)
+  test2 <- getModelOutput(fromYr = 1999, toYr = 2000, id = ids, latDeg, longDeg, modelName = "DegreeDay_Annual")
 })
 shutdownJava()
+
+as.character(test2$KeyID)
+

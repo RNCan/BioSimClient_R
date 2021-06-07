@@ -376,7 +376,7 @@ getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM = rep(NA, le
 #  if (alternativeMethod) {
     outputBioSimDataSet <- J4R::callJavaMethod("biosimclient.BioSimDataSet", "convertLinkedHashMapToBioSimDataSet", map)
     outputDataFrame <- .convertJavaDataSetIntoDataFrame(outputBioSimDataSet)
-    outputDataFrame$KeyID <- factor(x = outputDataFrame$KeyID, labels = id)
+    outputDataFrame$KeyID <- as.character(factor(x = outputDataFrame$KeyID, labels = id))
 #  } else {
 #    listOfPlots <- J4R::getAllValuesFromListObject(jPlots)
 #    outputDataFrame <- .formatDataFrame(listOfPlots, map, id)
