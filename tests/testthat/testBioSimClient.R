@@ -35,6 +35,14 @@ test_that("Testing that all the elevations with NA are properly processed", {
   expect_equal(output[3,"DD"], 1990.80, tolerance = 1E-8)
 })
 
+output <- getModelOutput(fromYr = 1990, toYr = 1990, id=c("Reservoir Gouin", "fake1", "fake2"), latDeg = c(48.5,49,50), longDeg = c(-74.5,-73,-72), modelName = "DegreeDay_Annual")
+
+test_that("Testing that all the elevations with no elevation argument are properly processed", {
+  expect_equal(output[1,"DD"], 2200.30, tolerance = 1E-8)
+  expect_equal(output[2,"DD"], 2258.50, tolerance = 1E-8)
+  expect_equal(output[3,"DD"], 1990.80, tolerance = 1E-8)
+})
+
 locations <- BioSIM::twoLocationsInSouthernQuebec
 print(locations)
 
@@ -255,4 +263,4 @@ biosimclient.config()
 
 
 
-shutdownJava()
+shutdownClient()

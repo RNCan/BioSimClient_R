@@ -10,7 +10,7 @@ getModelOutput(
   id,
   latDeg,
   longDeg,
-  elevM,
+  elevM = rep(NA, length(longDeg)),
   modelName,
   isEphemeral = T,
   rep = 1,

@@ -9,7 +9,7 @@ getMonthlyNormals(
   id,
   latDeg,
   longDeg,
-  elevM,
+  elevM = rep(NA, length(longDeg)),
   rcp = "RCP45",
   climModel = "RCM4"
 )

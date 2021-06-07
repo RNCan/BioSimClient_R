@@ -85,6 +85,31 @@ shutdownJava <- function() {
 
 
 #'
+#' Shut down the Java server
+#'
+#' This method overrides the original function of the J4R package. It only adds
+#' a call to the clearCache function before calling the original function of
+#' the J4R package.
+#'
+#' @examples
+#' \dontrun{
+#' shutdownClient()}
+#'
+#' @export
+shutdownClient <- function() {
+  tryCatch ({
+    if (J4R::isConnectedToJava() && J4R::checkIfClasspathContains("biosimclient.jar")) {
+      message("Clearing out the client cache. This may take a while...")
+      clearCache()
+    }
+  },
+  error = function(cond) {
+    message("An error occurred while attempting to clear the cache!")
+  })
+  J4R::shutdownClient()
+}
+
+#'
 #' Configure the client
 #'
 #' The forceClimateGenerationEnabled argument forces BioSIM to generate climate for past dates instead of

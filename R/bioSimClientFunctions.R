@@ -63,7 +63,7 @@ allMonths <- c("January", "February", "March", "April", "May", "June", "July", "
 #'                           c("June", "July", "August"))}
 #'
 #' @export
-getNormals <- function(period, id, latDeg, longDeg, elevM, averageOverTheseMonths, rcp="RCP45", climModel = "RCM4") {
+getNormals <- function(period, id, latDeg, longDeg, elevM = rep(NA, length(longDeg)), averageOverTheseMonths, rcp="RCP45", climModel = "RCM4") {
   # For debugging
   # period <- "1981_2010"
   # id <- locations$id
@@ -94,11 +94,21 @@ getNormals <- function(period, id, latDeg, longDeg, elevM, averageOverTheseMonth
   jRCP <- J4R::createJavaObject("biosimclient.BioSimEnums$RCP", rcp)
   jClimModel <- J4R::createJavaObject("biosimclient.BioSimEnums$ClimateModel", climModel)
 
-  maps <- J4R::callJavaMethod("biosimclient.BioSimClient", "getNormals", jPeriod, jPlots, jRCP, jClimModel, jAverageOverTheseMonths)
+  map <- J4R::callJavaMethod("biosimclient.BioSimClient", "getNormals", jPeriod, jPlots, jRCP, jClimModel, jAverageOverTheseMonths)
 
-  listOfPlots <- J4R::getAllValuesFromListObject(jPlots)
+  mapSize <- map$size()
+  listSize <- jPlots$size()
+  if (mapSize != listSize) {
+    print(paste("The map has size =", mapSize, "while the list has size =", listSize))
+  }
 
-  outputDataFrame <- .formatDataFrame(listOfPlots, maps, id)
+  outputBioSimDataSet <- J4R::callJavaMethod("biosimclient.BioSimDataSet", "convertLinkedHashMapToBioSimDataSet", map)
+  outputDataFrame <- .convertJavaDataSetIntoDataFrame(outputBioSimDataSet)
+  outputDataFrame$KeyID <- factor(x = outputDataFrame$KeyID, labels = id)
+
+#  listOfPlots <- J4R::getAllValuesFromListObject(jPlots)
+
+#  outputDataFrame <- .formatDataFrame(listOfPlots, maps, id)
 
   return(outputDataFrame)
 }
@@ -125,7 +135,7 @@ getNormals <- function(period, id, latDeg, longDeg, elevM, averageOverTheseMonth
 #'                                      locations$Longitude, locations$Elevation)}
 #'
 #' @export
-getAnnualNormals <- function(period, id, latDeg, longDeg, elevM, rcp="RCP45", climModel = "RCM4") {
+getAnnualNormals <- function(period, id, latDeg, longDeg, elevM = rep(NA, length(longDeg)), rcp="RCP45", climModel = "RCM4") {
   return(getNormals(period, id, latDeg, longDeg, elevM, BioSIM::allMonths, rcp, climModel))
 }
 
@@ -151,7 +161,7 @@ getAnnualNormals <- function(period, id, latDeg, longDeg, elevM, rcp="RCP45", cl
 #'                                    locations$Longitude, locations$Elevation)}
 #'
 #' @export
-getMonthlyNormals <- function(period, id, latDeg, longDeg, elevM, rcp="RCP45", climModel = "RCM4") {
+getMonthlyNormals <- function(period, id, latDeg, longDeg, elevM = rep(NA, length(longDeg)), rcp="RCP45", climModel = "RCM4") {
   return(getNormals(period, id, latDeg, longDeg, elevM, NULL, rcp, climModel))
 }
 
@@ -224,33 +234,33 @@ getModelDefaultParameters <- function(modelName) {
 
 
 
-.formatDataFrame <- function(listOfPlots, maps, id) {
-  latDeg <- listOfPlots$getLatitudeDeg()
-  longDeg <- listOfPlots$getLongitudeDeg()
-  elevM <- listOfPlots$getElevationM()
-
-  outputDataFrame <- NULL
-
-  for (i in 1:length(listOfPlots)) {
-    plot <- listOfPlots[[i]]
-    if (maps$containsKey(plot) == F) {
-      stop(paste("Plot", i, "is not in the map"))
-    }
-    data.i <- maps$get(plot)
-    data.i <- .convertJavaDataSetIntoDataFrame(data.i)
-    data.i$KeyID <- id[i]
-    data.i$Latitude <- latDeg[i]
-    data.i$Longitude <- longDeg[i]
-    data.i$Elevation <- elevM[i]
-    outputDataFrame <- rbind(outputDataFrame, data.i)
-  }
-
-  firstFields <- c("KeyID", "Latitude", "Longitude", "Elevation")
-  fieldnames <- colnames(outputDataFrame)
-  fieldnames <- c(firstFields, fieldnames[which(!(fieldnames %in% firstFields))])
-
-  return(outputDataFrame[,fieldnames])
-}
+# .formatDataFrame <- function(listOfPlots, maps, id) {
+#   latDeg <- listOfPlots$getLatitudeDeg()
+#   longDeg <- listOfPlots$getLongitudeDeg()
+#   elevM <- listOfPlots$getElevationM()
+#
+#   outputDataFrame <- NULL
+#
+#   for (i in 1:length(listOfPlots)) {
+#     plot <- listOfPlots[[i]]
+#     if (maps$containsKey(plot) == F) {
+#       stop(paste("Plot", i, "is not in the map"))
+#     }
+#     data.i <- maps$get(plot)
+#     data.i <- .convertJavaDataSetIntoDataFrame(data.i)
+#     data.i$KeyID <- id[i]
+#     data.i$Latitude <- latDeg[i]
+#     data.i$Longitude <- longDeg[i]
+#     data.i$Elevation <- elevM[i]
+#     outputDataFrame <- rbind(outputDataFrame, data.i)
+#   }
+#
+#   firstFields <- c("KeyID", "Latitude", "Longitude", "Elevation")
+#   fieldnames <- colnames(outputDataFrame)
+#   fieldnames <- c(firstFields, fieldnames[which(!(fieldnames %in% firstFields))])
+#
+#   return(outputDataFrame[,fieldnames])
+# }
 
 .checkInputAndFormatIfNeeded <- function(id, latDeg, longDeg, elevM) {
   if (is.null(id) | is.null(latDeg) | is.null(longDeg) | is.null(elevM)) {
@@ -308,7 +318,7 @@ getModelDefaultParameters <- function(modelName) {
 #'                              rcp = "RCP85", climModel = "GCM4", additionalParms = addParms)}
 #'
 #' @export
-getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, isEphemeral = T, rep = 1, repModel = 1, rcp = "RCP45", climModel = "RCM4", additionalParms = NULL) {
+getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM = rep(NA, length(longDeg)), modelName, isEphemeral = T, rep = 1, repModel = 1, rcp = "RCP45", climModel = "RCM4", additionalParms = NULL) {
   # For debugging
   # fromYr <- 1998
   # toYr <- 2006
@@ -344,7 +354,7 @@ getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, 
   }
 
 
-  maps <- J4R::callJavaMethod("biosimclient.BioSimClient",
+  map <- J4R::callJavaMethod("biosimclient.BioSimClient",
                       "getModelOutput",
                       as.integer(fromYr),
                       as.integer(toYr),
@@ -356,15 +366,21 @@ getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM, modelName, 
                       as.integer(repModel),
                       isEphemeral,
                       jAdditionalParms)
-  listOfPlots <- J4R::getAllValuesFromListObject(jPlots)
 
-  mapSize <- maps$size()
+  mapSize <- map$size()
   listSize <- jPlots$size()
   if (mapSize != listSize) {
     print(paste("The map has size =", mapSize, "while the list has size =", listSize))
   }
 
-  outputDataFrame <- .formatDataFrame(listOfPlots, maps, id)
+#  if (alternativeMethod) {
+    outputBioSimDataSet <- J4R::callJavaMethod("biosimclient.BioSimDataSet", "convertLinkedHashMapToBioSimDataSet", map)
+    outputDataFrame <- .convertJavaDataSetIntoDataFrame(outputBioSimDataSet)
+    outputDataFrame$KeyID <- factor(x = outputDataFrame$KeyID, labels = id)
+#  } else {
+#    listOfPlots <- J4R::getAllValuesFromListObject(jPlots)
+#    outputDataFrame <- .formatDataFrame(listOfPlots, map, id)
+#  }
 
   return(outputDataFrame)
 }
