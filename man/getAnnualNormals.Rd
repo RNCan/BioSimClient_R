@@ -4,15 +4,8 @@
 \alias{getAnnualNormals}
 \title{Return the annual normals for a period}
 \usage{
-getAnnualNormals(
-  period,
-  id,
-  latDeg,
-  longDeg,
-  elevM = rep(NA, length(longDeg)),
-  rcp = "RCP45",
-  climModel = "RCM4"
-)
+getAnnualNormals(period, id, latDeg, longDeg, elevM = rep(NA,
+  length(longDeg)), rcp = "RCP45", climModel = "RCM4")
 }
 \arguments{
 \item{period}{a string representing the period (either "1951_1980", "1961_1990", "1971_2000", "1981_2010" up to "2071_2100")}
