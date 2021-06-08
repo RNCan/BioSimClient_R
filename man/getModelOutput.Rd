@@ -4,21 +4,10 @@
 \alias{getModelOutput}
 \title{Generate climate and apply a model.}
 \usage{
-getModelOutput(
-  fromYr,
-  toYr,
-  id,
-  latDeg,
-  longDeg,
-  elevM = rep(NA, length(longDeg)),
-  modelName,
-  isEphemeral = T,
-  rep = 1,
-  repModel = 1,
-  rcp = "RCP45",
-  climModel = "RCM4",
-  additionalParms = NULL
-)
+getModelOutput(fromYr, toYr, id, latDeg, longDeg, elevM = rep(NA,
+  length(longDeg)), modelName, isEphemeral = T, rep = 1,
+  repModel = 1, rcp = "RCP45", climModel = "RCM4",
+  additionalParms = NULL)
 }
 \arguments{
 \item{fromYr}{the starting date (yr) of the period (inclusive)}

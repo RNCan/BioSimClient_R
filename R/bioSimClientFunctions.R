@@ -104,11 +104,7 @@ getNormals <- function(period, id, latDeg, longDeg, elevM = rep(NA, length(longD
 
   outputBioSimDataSet <- J4R::callJavaMethod("biosimclient.BioSimDataSet", "convertLinkedHashMapToBioSimDataSet", map)
   outputDataFrame <- .convertJavaDataSetIntoDataFrame(outputBioSimDataSet)
-  outputDataFrame$KeyID <- factor(x = outputDataFrame$KeyID, labels = id)
-
-#  listOfPlots <- J4R::getAllValuesFromListObject(jPlots)
-
-#  outputDataFrame <- .formatDataFrame(listOfPlots, maps, id)
+  outputDataFrame <- .setKeyID(outputDataFrame, id)
 
   return(outputDataFrame)
 }
@@ -179,7 +175,8 @@ getMonthlyNormals <- function(period, id, latDeg, longDeg, elevM = rep(NA, lengt
 #' @export
 getModelList <- function() {
   .connectToBioSIMClient()
-  return(J4R::getAllValuesFromListObject(J4R::callJavaMethod("biosimclient.BioSimClient", "getModelList")))
+  jList <- J4R::callJavaMethod("biosimclient.BioSimClient", "getModelList")
+  return(J4R::getAllValuesFromListObject(jList))
 }
 
 #'
@@ -234,33 +231,6 @@ getModelDefaultParameters <- function(modelName) {
 
 
 
-# .formatDataFrame <- function(listOfPlots, maps, id) {
-#   latDeg <- listOfPlots$getLatitudeDeg()
-#   longDeg <- listOfPlots$getLongitudeDeg()
-#   elevM <- listOfPlots$getElevationM()
-#
-#   outputDataFrame <- NULL
-#
-#   for (i in 1:length(listOfPlots)) {
-#     plot <- listOfPlots[[i]]
-#     if (maps$containsKey(plot) == F) {
-#       stop(paste("Plot", i, "is not in the map"))
-#     }
-#     data.i <- maps$get(plot)
-#     data.i <- .convertJavaDataSetIntoDataFrame(data.i)
-#     data.i$KeyID <- id[i]
-#     data.i$Latitude <- latDeg[i]
-#     data.i$Longitude <- longDeg[i]
-#     data.i$Elevation <- elevM[i]
-#     outputDataFrame <- rbind(outputDataFrame, data.i)
-#   }
-#
-#   firstFields <- c("KeyID", "Latitude", "Longitude", "Elevation")
-#   fieldnames <- colnames(outputDataFrame)
-#   fieldnames <- c(firstFields, fieldnames[which(!(fieldnames %in% firstFields))])
-#
-#   return(outputDataFrame[,fieldnames])
-# }
 
 .checkInputAndFormatIfNeeded <- function(id, latDeg, longDeg, elevM) {
   if (is.null(id) | is.null(latDeg) | is.null(longDeg) | is.null(elevM)) {
@@ -373,18 +343,22 @@ getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM = rep(NA, le
     print(paste("The map has size =", mapSize, "while the list has size =", listSize))
   }
 
-#  if (alternativeMethod) {
-    outputBioSimDataSet <- J4R::callJavaMethod("biosimclient.BioSimDataSet", "convertLinkedHashMapToBioSimDataSet", map)
-    outputDataFrame <- .convertJavaDataSetIntoDataFrame(outputBioSimDataSet)
-    outputDataFrame$KeyID <- as.character(factor(x = outputDataFrame$KeyID, labels = id))
-#  } else {
-#    listOfPlots <- J4R::getAllValuesFromListObject(jPlots)
-#    outputDataFrame <- .formatDataFrame(listOfPlots, map, id)
-#  }
-
+  outputBioSimDataSet <- J4R::callJavaMethod("biosimclient.BioSimDataSet", "convertLinkedHashMapToBioSimDataSet", map)
+  outputDataFrame <- .convertJavaDataSetIntoDataFrame(outputBioSimDataSet)
+  outputDataFrame <- .setKeyID(outputDataFrame, id)
   return(outputDataFrame)
 }
 
+.setKeyID <- function(outputDataFrame, id) {
+  InnerKeyID <- 1:length(id)
+  id.df <- data.frame(InnerKeyID, id)
+  colnames(id.df)[2] <- "KeyID"
+  outputDataFrameFinal <- merge(id.df, outputDataFrame, by ="InnerKeyID")
+  if (nrow(outputDataFrameFinal) != nrow(outputDataFrame)) {
+    stop("Some ids were apparently not merged into the outputDataFrame!")
+  }
+  return(outputDataFrameFinal[,-1])
+}
 
 #'
 #' Clear the cache of the client

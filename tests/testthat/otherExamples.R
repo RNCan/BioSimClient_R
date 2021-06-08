@@ -32,11 +32,11 @@ y <- c(mean1951_1980, mean1961_1990, mean1971_2000, mean1981_2010, mean1991_2020
 x <- c(1980, 1990, 2000, 2010, 2020, 2030, 2040)
 fromAnnualValues <- data.frame(x,y)
 
-require(ggplot2)
-ggplot() +
-#  geom_line(aes(x=per, y=TM, group=model, col=model), output) +
-#  geom_point(aes(x=per, y=TM), output) +
-  geom_point(aes(x=x, y=y), fromAnnualValues, col="blue")
+# require(ggplot2)
+# ggplot() +
+# #  geom_line(aes(x=per, y=TM, group=model, col=model), output) +
+# #  geom_point(aes(x=per, y=TM), output) +
+#   geom_point(aes(x=x, y=y), fromAnnualValues, col="blue")
 
 
 
@@ -64,27 +64,27 @@ colnames(q90) <- c("julianDate", "q90")
 
 stats <- merge(merge(min, mean, by="julianDate"), max, by="julianDate")
 stats <- merge(merge(stats, q10, by="julianDate"), q90, by="julianDate")
-require(ggplot2)
+# require(ggplot2)
+#
+# ggplot() +
+#   geom_ribbon(aes(x=julianDate, ymin=min, ymax=max), stats, alpha = .5) +
+#   geom_line(aes(x=julianDate, y=mean), stats) +
+#   geom_line(aes(x=julianDate, y=q10), stats, lty = 2) +
+#   geom_line(aes(x=julianDate, y=q90), stats, lty = 2) +
+#   scale_x_continuous(breaks = seq(135, 155, by = 5), labels = c("15/05", "20/05", "25/05", "30/05", "4/06")) +
+#   ylab("Temperature") +
+#   xlab("Julian date")
 
-ggplot() +
-  geom_ribbon(aes(x=julianDate, ymin=min, ymax=max), stats, alpha = .5) +
-  geom_line(aes(x=julianDate, y=mean), stats) +
-  geom_line(aes(x=julianDate, y=q10), stats, lty = 2) +
-  geom_line(aes(x=julianDate, y=q90), stats, lty = 2) +
-  scale_x_continuous(breaks = seq(135, 155, by = 5), labels = c("15/05", "20/05", "25/05", "30/05", "4/06")) +
-  ylab("Temperature") +
-  xlab("Julian date")
 
-
-latDeg <- runif(n = 1000, min=48, max=51)
-longDeg <- runif(n = 1000, min=-76, max=-66)
-ids <- paste(rep("plot",1000),1:100,sep="")
+latDeg <- runif(n = 100, min=48, max=51)
+longDeg <- runif(n = 100, min=-76, max=-66)
+ids <- paste(rep("plot",100),1:100,sep="")
 require(BioSIM)
 getModelList()
 system.time({
   test2 <- getModelOutput(fromYr = 1999, toYr = 2000, id = ids, latDeg, longDeg, modelName = "DegreeDay_Annual")
 })
-shutdownJava()
+shutdownClient()
 
 as.character(test2$KeyID)
 

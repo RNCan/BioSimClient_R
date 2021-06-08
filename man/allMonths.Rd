@@ -4,9 +4,7 @@
 \name{allMonths}
 \alias{allMonths}
 \title{The list of all months}
-\format{
-An object of class \code{character} of length 12.
-}
+\format{An object of class \code{character} of length 12.}
 \usage{
 allMonths
 }

@@ -13,6 +13,16 @@
 
 library(BioSIM)
 
+latDeg <- runif(n = 3, min=48, max=51)
+longDeg <- runif(n = 3, min=-76, max=-66)
+ids <- c("plot1", "plot1", "plot2")
+require(BioSIM)
+testWithSameIds <- getModelOutput(fromYr = 1999, toYr = 2000, id = ids, latDeg, longDeg, modelName = "DegreeDay_Annual")
+test_that("Testing that replicated ids do not interfere", {
+  expect_equal(nrow(testWithSameIds), 6)
+})
+
+
 output <- getModelOutput(fromYr = 1990, toYr = 1990, id="Reservoir Gouin", latDeg = 48.5, longDeg = -74.5, elevM = NA, modelName = "DegreeDay_Annual")
 
 test_that("Testing that one elevation with NA are properly processed", {

@@ -4,15 +4,8 @@
 \alias{getMonthlyNormals}
 \title{Return the monthly normals for a period}
 \usage{
-getMonthlyNormals(
-  period,
-  id,
-  latDeg,
-  longDeg,
-  elevM = rep(NA, length(longDeg)),
-  rcp = "RCP45",
-  climModel = "RCM4"
-)
+getMonthlyNormals(period, id, latDeg, longDeg, elevM = rep(NA,
+  length(longDeg)), rcp = "RCP45", climModel = "RCM4")
 }
 \arguments{
 \item{period}{a string representing the period (either "1951_1980", "1961_1990", "1971_2000", "1981_2010" up to "2071_2100")}
