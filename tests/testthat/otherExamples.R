@@ -1,5 +1,10 @@
 library(BioSIM)
 
+locations <- BioSIM::twoLocationsInSouthernQuebec
+print(locations)
+
+getModelOutput(2000, 2004, locations$Name, locations$Latitude, locations$Longitude, modelName = "DegreeDay_Annual")
+
 rm(list = ls())
 periods <- c("1951_1980", "1961_1990", "1971_2000", "1981_2010", "1991_2020", "2001_2030", "2011_2040", "2021_2050", "2031_2060", "2041_2070", "2051_2080", "2061_2090")
 climModels <- c("GCM4", "RCM4", "Hadley")
@@ -86,5 +91,18 @@ system.time({
 })
 shutdownClient()
 
-as.character(test2$KeyID)
+
+
+
+require(BioSIM)
+getModelHelp("MPB_SLR")
+mpb_slr <- getModelOutput(fromYr = 2011, toYr = 2020, id = "SomewhereInBC", latDeg = 50, longDeg = -97, modelName = "MPB_SLR")
+parms <- getModelDefaultParameters("MPB_SLR")
+parms["RunLength"] <- 5
+mpb_slr5YrPeriods <- getModelOutput(fromYr = 2011, toYr = 2020, id = "SomewhereInBC", latDeg = 50, longDeg = -97, modelName = "MPB_SLR", additionalParms = parms)
+parms["RunLength"] <- 1
+mpb_slr1YrPeriods <- getModelOutput(fromYr = 2011, toYr = 2020, id = "SomewhereInBC", latDeg = 50, longDeg = -97, modelName = "MPB_SLR", additionalParms = parms)
+
+
+mpb_slrFuture <- getModelOutput(fromYr = 2025, toYr = 2030, id = "SomewhereInBC", latDeg = 50, longDeg = -97, modelName = "MPB_SLR")
 
