@@ -289,6 +289,51 @@ getModelDefaultParameters <- function(modelName) {
 #'
 #' @export
 getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM = rep(NA, length(longDeg)), modelName, isEphemeral = T, rep = 1, repModel = 1, rcp = "RCP45", climModel = "RCM4", additionalParms = NULL) {
+  return(generateModelOutput(modelName, fromYr, toYr, id, latDeg, longDeg, elevM, isEphemeral, rep, repModel, rcp, climModel, additionalParms))
+}
+
+.Deprecated(new = "generateModelOutput",
+            package="BioSIM",
+            msg = "Function getModelOutput has a signature that can cause trouble in some cases. For this reason, it is now deprecated. Please use the generateModelOutput function instead.",
+            old = "getModelOutput")
+
+#'
+#' Generate climate and apply a model.
+#'
+#' This function generated the basic climate variables for some locations
+#' and applies a particular model on this generated climate.
+#'
+#' @param modelName a character. Should be one of the models listed in the available models (see the getModelList() method)
+#' @param fromYr the starting date (yr) of the period (inclusive)
+#' @param toYr the ending date (yr) of the period (inclusive)
+#' @param id a vector with the ids of the plots
+#' @param latDeg the latitudes of the plots
+#' @param longDeg the longitudes of the plots
+#' @param elevM the elevations of the plots (can contain some NA or can be NULL, in which cases BioSim relies on a digital elevation model)
+#' @param isEphemeral a logical. If set to true, the generated climate is not stored on the server, which implies a greater
+#' computational burden and inconsistencies if different models are applied on the same locations. By default, it is set to
+#' true.
+#' @param rep number of replicates of generated climate (is set to 1 by default)
+#' @param repModel number of replicates on the model end (is set to 1 by default)
+#' @param rcp an representative concentration pathway (either "RCP45" or "RCP85")
+#' @param climModel a climatic model (either "RCM4", "GCM4" or "Hadley")
+#' @param additionalParms a named vector with the additional parameters if needed
+#'
+#' @return a data.frame object
+#'
+#' @examples
+#'
+#' locations <- BioSIM::twoLocationsInSouthernQuebec
+#' addParms <- c("LowerThreshold"=5)
+#' \dontrun{
+#' degreeDays <- generateModelOutput("DegreeDay_Annual", 2017, 2021, locations$Name, locations$Latitude,
+#'                              locations$Longitude, locations$Elevation,
+#'                              rcp = "RCP85", climModel = "GCM4", additionalParms = addParms)}
+#'
+#' @export
+generateModelOutput <- function(modelName, fromYr, toYr, id, latDeg, longDeg,
+                                elevM = rep(NA, length(longDeg)), isEphemeral = T, rep = 1,
+                                repModel = 1, rcp = "RCP45", climModel = "RCM4", additionalParms = NULL) {
   # For debugging
   # fromYr <- 1998
   # toYr <- 2006
@@ -325,17 +370,17 @@ getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM = rep(NA, le
 
 
   map <- J4R::callJavaMethod("biosimclient.BioSimClient",
-                      "getModelOutput",
-                      as.integer(fromYr),
-                      as.integer(toYr),
-                      jPlots,
-                      jRCP,
-                      jClimModel,
-                      modelName,
-                      as.integer(rep),
-                      as.integer(repModel),
-                      isEphemeral,
-                      jAdditionalParms)
+                             "getModelOutput",
+                             as.integer(fromYr),
+                             as.integer(toYr),
+                             jPlots,
+                             jRCP,
+                             jClimModel,
+                             modelName,
+                             as.integer(rep),
+                             as.integer(repModel),
+                             isEphemeral,
+                             jAdditionalParms)
 
   mapSize <- map$size()
   listSize <- jPlots$size()
@@ -348,6 +393,9 @@ getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM = rep(NA, le
   outputDataFrame <- .setKeyID(outputDataFrame, id)
   return(outputDataFrame)
 }
+
+
+
 
 .setKeyID <- function(outputDataFrame, id) {
   InnerKeyID <- 1:length(id)
