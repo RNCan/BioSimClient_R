@@ -289,13 +289,11 @@ getModelDefaultParameters <- function(modelName) {
 #'
 #' @export
 getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM = rep(NA, length(longDeg)), modelName, isEphemeral = T, rep = 1, repModel = 1, rcp = "RCP45", climModel = "RCM4", additionalParms = NULL) {
+  .Deprecated(new = "generateModelOutput",
+              msg = "Function getModelOutput has a signature that can cause trouble in some cases. For this reason, it is now deprecated. Please use the generateModelOutput function instead.")
   return(generateModelOutput(modelName, fromYr, toYr, id, latDeg, longDeg, elevM, isEphemeral, rep, repModel, rcp, climModel, additionalParms))
 }
 
-.Deprecated(new = "generateModelOutput",
-            package="BioSIM",
-            msg = "Function getModelOutput has a signature that can cause trouble in some cases. For this reason, it is now deprecated. Please use the generateModelOutput function instead.",
-            old = "getModelOutput")
 
 #'
 #' Generate climate and apply a model.

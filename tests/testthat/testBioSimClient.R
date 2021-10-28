@@ -17,19 +17,19 @@ latDeg <- runif(n = 3, min=48, max=51)
 longDeg <- runif(n = 3, min=-76, max=-66)
 ids <- c("plot1", "plot1", "plot2")
 require(BioSIM)
-testWithSameIds <- getModelOutput(fromYr = 1999, toYr = 2000, id = ids, latDeg, longDeg, modelName = "DegreeDay_Annual")
+testWithSameIds <- generateModelOutput("DegreeDay_Annual", 1999, 2000, ids, latDeg, longDeg)
 test_that("Testing that replicated ids do not interfere", {
   expect_equal(nrow(testWithSameIds), 6)
 })
 
 
-output <- getModelOutput(fromYr = 1990, toYr = 1990, id="Reservoir Gouin", latDeg = 48.5, longDeg = -74.5, elevM = NA, modelName = "DegreeDay_Annual")
+output <- generateModelOutput("DegreeDay_Annual", 1990, 1990, "Reservoir Gouin", 48.5, -74.5, NA)
 
 test_that("Testing that one elevation with NA are properly processed", {
   expect_equal(output$DD, 2200.30, tolerance = 1E-8)
 })
 
-output <- getModelOutput(fromYr = 1990, toYr = 1990, id=c("Reservoir Gouin", "fake1", "fake2"), latDeg = c(48.5,49,50), longDeg = c(-74.5,-73,-72), elevM = c(300,NA,200), modelName = "DegreeDay_Annual")
+output <- generateModelOutput(modelName = "DegreeDay_Annual", fromYr = 1990, toYr = 1990, id=c("Reservoir Gouin", "fake1", "fake2"), latDeg = c(48.5,49,50), longDeg = c(-74.5,-73,-72), elevM = c(300,NA,200))
 
 test_that("Testing that one elevation among others with NA are properly processed", {
   expect_equal(output[1,"DD"], 2299.15, tolerance = 1E-8)
@@ -37,7 +37,7 @@ test_that("Testing that one elevation among others with NA are properly processe
   expect_equal(output[3,"DD"], 2210.40, tolerance = 1E-8)
 })
 
-output <- getModelOutput(fromYr = 1990, toYr = 1990, id=c("Reservoir Gouin", "fake1", "fake2"), latDeg = c(48.5,49,50), longDeg = c(-74.5,-73,-72), elevM = c(NA,NA,NA), modelName = "DegreeDay_Annual")
+output <- generateModelOutput(modelName = "DegreeDay_Annual", fromYr = 1990, toYr = 1990, id=c("Reservoir Gouin", "fake1", "fake2"), latDeg = c(48.5,49,50), longDeg = c(-74.5,-73,-72), elevM = c(NA,NA,NA))
 
 test_that("Testing that all the elevations with NA are properly processed", {
   expect_equal(output[1,"DD"], 2200.30, tolerance = 1E-8)
@@ -45,7 +45,7 @@ test_that("Testing that all the elevations with NA are properly processed", {
   expect_equal(output[3,"DD"], 1990.80, tolerance = 1E-8)
 })
 
-output <- getModelOutput(fromYr = 1990, toYr = 1990, id=c("Reservoir Gouin", "fake1", "fake2"), latDeg = c(48.5,49,50), longDeg = c(-74.5,-73,-72), modelName = "DegreeDay_Annual")
+output <- generateModelOutput(modelName = "DegreeDay_Annual", fromYr = 1990, toYr = 1990, id=c("Reservoir Gouin", "fake1", "fake2"), latDeg = c(48.5,49,50), longDeg = c(-74.5,-73,-72))
 
 test_that("Testing that all the elevations with no elevation argument are properly processed", {
   expect_equal(output[1,"DD"], 2200.30, tolerance = 1E-8)
@@ -123,7 +123,7 @@ test_that("Testing that 2061-2090 annual normals under RCP 8.5 and climate model
 })
 
 
-degreeDays <- getModelOutput(1994, 2002, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, "DegreeDay_Annual", F)
+degreeDays <- generateModelOutput("DegreeDay_Annual", 1994, 2002, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation,F)
 
 test_that("Testing degree-days between 1994 and 2004 for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 1994),"DD"] - 2802.15) < 1E-4, TRUE)
@@ -146,7 +146,7 @@ test_that("Testing degree-days between 1994 and 2004 for Quebec and Sorel can be
   expect_equal(abs(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2002),"DD"] - 3232.50) < 1E-4, TRUE)
 })
 
-growingSeason <- getModelOutput(1994, 2002, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, "GrowingSeason", F)
+growingSeason <- generateModelOutput("GrowingSeason", 1994, 2002, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, F)
 
 test_that("Testing growing season between 1994 and 2004 for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(growingSeason[which(growingSeason$KeyID == "Quebec" & growingSeason$Year == 1994),"Length"] - 172) < 1E-4, TRUE)
@@ -169,7 +169,7 @@ test_that("Testing growing season between 1994 and 2004 for Quebec and Sorel can
   expect_equal(abs(growingSeason[which(growingSeason$KeyID == "Sorel" & growingSeason$Year == 2002),"Length"] - 173) < 1E-4, TRUE)
 })
 
-degreeDays <- getModelOutput(2017, 2021, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, "DegreeDay_Annual", rcp = "RCP85", climModel = "GCM4")
+degreeDays <- generateModelOutput("DegreeDay_Annual", 2017, 2021, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, rcp = "RCP85", climModel = "GCM4")
 
 test_that("Testing degree-days between 2017 and 2021 under RCP 8.5 and climate model GCM4 for Quebec and Sorel can be properly retrieved", {
   expect_equal(abs(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2017),"DD"] - 2840.05) < 1E-4, TRUE)
@@ -184,7 +184,7 @@ test_that("Testing degree-days between 2017 and 2021 under RCP 8.5 and climate m
   expect_equal(abs(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2021),"DD"] - 3137.25) < 1E-4, FALSE)
 })
 
-degreeDays <- getModelOutput(2017, 2018, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, "DegreeDay_Annual", additionalParms = c("LowerThreshold"=5))
+degreeDays <- generateModelOutput("DegreeDay_Annual", 2017, 2018, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, additionalParms = c("LowerThreshold"=5))
 
 test_that("Testing degree-days above 5C in 2017 and 2018 can be properly retrieved", {
   expect_equal(abs(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2017),"DD"] - 1789.10) < 1E-4, TRUE)
@@ -195,7 +195,7 @@ test_that("Testing degree-days above 5C in 2017 and 2018 can be properly retriev
 
 
 biosimclient.config(forceClimateGenerationEnabled = T)
-degreeDays <- getModelOutput(2017, 2018, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, "DegreeDay_Annual", additionalParms = c("LowerThreshold"=5))
+degreeDays <- generateModelOutput("DegreeDay_Annual", 2017, 2018, locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, additionalParms = c("LowerThreshold"=5))
 
 test_that("Testing degree-days above 5C in 2017 and 2018 are generated and not compiled from observations", {
   expect_equal(abs(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2017),"DD"] - 1789.10) > 1E-4, TRUE)
@@ -207,7 +207,7 @@ biosimclient.config()  ### reset the configuration
 
 
 biosimclient.config(nbNearestNeighbours = 20)
-degreeDays <- getModelOutput(2017, 2018, "lostSomewhere", 50, -70, 300, "DegreeDay_Annual", additionalParms = c("LowerThreshold"=5))
+degreeDays <- generateModelOutput("DegreeDay_Annual", 2017, 2018, "lostSomewhere", 50, -70, 300, additionalParms = c("LowerThreshold"=5))
 test_that("Testing degree-days above 5C in 2017 and 2018 are generated and not compiled from observations", {
   expect_equal(abs(degreeDays[which(degreeDays$KeyID == "lostSomewhere" & degreeDays$Year == 2017),"DD"] - 1174.95) > 1E-4, TRUE)
   expect_equal(abs(degreeDays[which(degreeDays$KeyID == "lostSomewhere" & degreeDays$Year == 2018),"DD"] - 1206.15) > 1E-4, TRUE)
@@ -220,8 +220,8 @@ test_that("Testing default parameters are returned", {
   expect_equal(length(addParms), 8)
 })
 
-dd1 <- getModelOutput(2017, 2018, "lostSomewhere", 50, -70, 300, "DegreeDay_Annual")
-dd2 <- getModelOutput(2017, 2018, "lostSomewhere", 50, -70, 300, "DegreeDay_Annual", additionalParms = addParms)
+dd1 <- generateModelOutput("DegreeDay_Annual", 2017, 2018, "lostSomewhere", 50, -70, 300)
+dd2 <- generateModelOutput("DegreeDay_Annual", 2017, 2018, "lostSomewhere", 50, -70, 300, additionalParms = addParms)
 test_that("Testing degree-days above 5C in 2017 and 2018 are generated and not compiled from observations", {
   expect_equal(length(dd1[,1]), 2)
   expect_equal(dd1[which(dd1$KeyID == "lostSomewhere" & dd1$Year == 2017),"DD"], 2105.40)
@@ -232,8 +232,8 @@ test_that("Testing degree-days above 5C in 2017 and 2018 are generated and not c
 
 
 biosimclient.config(forceClimateGenerationEnabled = T, nbNearestNeighbours = 4)
-ClimaticQc_Annual <- getModelOutput(1981, 2010, locations$Name, locations$Latitude, locations$Longitude,
-                                    locations$Elevation, "ClimaticQc_Annual", rep=2)
+ClimaticQc_Annual <- generateModelOutput("ClimaticQc_Annual", 1981, 2010, locations$Name, locations$Latitude, locations$Longitude,
+                                    locations$Elevation, rep=2)
 test_that("Testing that we get 120 observations", {
   expect_equal(length(ClimaticQc_Annual[,1]), 120)
 })
@@ -242,12 +242,12 @@ biosimclient.config()
 
 annualMean <- getAnnualNormals("1981_2010", locations$Name, locations$Latitude, locations$Longitude, locations$Elevation)
 biosimclient.config(forceClimateGenerationEnabled = T)
-ClimaticQc_Annual <- getModelOutput(1981, 2010,
+ClimaticQc_Annual <- generateModelOutput("ClimaticQc_Annual",
+                                    1981, 2010,
                                     locations$Name,
                                     locations$Latitude,
                                     locations$Longitude,
                                     locations$Elevation,
-                                    "ClimaticQc_Annual",
                                     rep=10)
 biosimclient.config()
 
@@ -264,8 +264,8 @@ test_that("Testing that precipitation does not differ by more than 50mm", {
 
 
 biosimclient.config(forceClimateGenerationEnabled = T)
-ClimaticQc_Annual <- getModelOutput(1981, 2010, locations$Name, locations$Latitude, locations$Longitude,
-                                    locations$Elevation, "ClimaticQc_Annual", rep=2, repModel=2)
+ClimaticQc_Annual <- generateModelOutput("ClimaticQc_Annual", 1981, 2010, locations$Name, locations$Latitude, locations$Longitude,
+                                    locations$Elevation, rep=2, repModel=2)
 test_that("Testing that we get 240 observations when simulating 2 locations x 30 years x 2rep x 2repModel", {
   expect_equal(length(ClimaticQc_Annual[,1]), 240)
 })
