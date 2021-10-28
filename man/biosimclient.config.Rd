@@ -4,8 +4,10 @@
 \alias{biosimclient.config}
 \title{Configure the client}
 \usage{
-biosimclient.config(forceClimateGenerationEnabled = NULL,
-  nbNearestNeighbours = NULL)
+biosimclient.config(
+  forceClimateGenerationEnabled = NULL,
+  nbNearestNeighbours = NULL
+)
 }
 \arguments{
 \item{forceClimateGenerationEnabled}{a logical}
