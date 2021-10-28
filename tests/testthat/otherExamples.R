@@ -4,6 +4,7 @@ locations <- BioSIM::twoLocationsInSouthernQuebec
 print(locations)
 
 getModelOutput(2000, 2004, locations$Name, locations$Latitude, locations$Longitude, modelName = "DegreeDay_Annual")
+generateModelOutput("DegreeDay_Annual", 2000, 2004, locations$Name, locations$Latitude, locations$Longitude)
 
 rm(list = ls())
 periods <- c("1951_1980", "1961_1990", "1971_2000", "1981_2010", "1991_2020", "2001_2030", "2011_2040", "2021_2050", "2031_2060", "2041_2070", "2051_2080", "2061_2090")
