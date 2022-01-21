@@ -1,7 +1,7 @@
 Package: BioSIM
 Type: Package
 Title: 'BioSIM' Client for Climate Variables 
-Version: 0.3.0-41
+Version: 1.0.0
 Author: Mathieu Fortin and Remi Saint-Amant, Canadian Forest Service
 Maintainer: Mathieu Fortin <mathieu.fortin.re@gmail.com>
 Copyright: Her Majesty the Queen in right of Canada
@@ -10,11 +10,11 @@ Description: Provide a client that retrieves the climate variables from the orig
 URL: https://sourceforge.net/p/mrnfforesttools/biosimclient/wiki/BioSIM-R/
 Depends: R (>= 3.5.0)
 Imports: 
-    J4R (>= 1.1.0)
+    J4R (>= 1.1.1)
 License: LGPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 SystemRequirements: Java 8
 Suggests: 
     testthat

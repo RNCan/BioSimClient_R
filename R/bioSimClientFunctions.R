@@ -81,6 +81,7 @@ getNormals <- function(period, id, latDeg, longDeg, elevM = rep(NA, length(longD
       }
     }
   }
+
   .connectToBioSIMClient()
   jPlots <- .createBioSimPlots(latDeg, longDeg, elevM)
 
@@ -210,11 +211,10 @@ getModelDefaultParameters <- function(modelName) {
   .connectToBioSIMClient()
   defParms <- J4R::callJavaMethod("biosimclient.BioSimClient", "getModelDefaultParameters", modelName)
   str <- defParms$toString()
-  strSplit <- strsplit(str, ",")[[1]]
+  strSplit <- strsplit(str, "\\*")[[1]]
   keys <- c()
   values <- c()
   for (ch in strSplit) {
-    print(ch)
     strSubsplit <- strsplit(ch, ":")[[1]]
     keys <- c(keys, strSubsplit[1])
     if (length(strSubsplit) > 1) {
@@ -255,7 +255,7 @@ getModelDefaultParameters <- function(modelName) {
 }
 
 #'
-#' Generate climate and apply a model.
+#' Generate climate and apply a model (DEPRECATED).
 #'
 #' This function generated the basic climate variables for some locations
 #' and applies a particular model on this generated climate.
@@ -296,7 +296,7 @@ getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM = rep(NA, le
 
 
 #'
-#' Generate climate and apply a model.
+#' Generate climate and apply a model (DEPRECATED).
 #'
 #' This function generated the basic climate variables for some locations
 #' and applies a particular model on this generated climate.
@@ -332,67 +332,9 @@ getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM = rep(NA, le
 generateModelOutput <- function(modelName, fromYr, toYr, id, latDeg, longDeg,
                                 elevM = rep(NA, length(longDeg)), isEphemeral = T, rep = 1,
                                 repModel = 1, rcp = "RCP45", climModel = "RCM4", additionalParms = NULL) {
-  # For debugging
-  # fromYr <- 1998
-  # toYr <- 2006
-  # id <- locations$id
-  # latDeg <- locations$latDeg
-  # longDeg <- locations$longDeg
-  # elevM <- locations$elevM
-  # modelName <- "DegreeDay_Annual"
-  # isEphemeral <- F
-  elevM <- .checkInputAndFormatIfNeeded(id, latDeg, longDeg, elevM)
-
-  # if (length(id) != length(latDeg)) {
-  #   stop("The arguments id, latDeg, longDeg and elevM must have the same length!")
-  # }
-  if (!is.null(additionalParms)) {
-    if (is.null(names(additionalParms))) {
-      stop("The vector additionalParms must be a named vector!")
-    } else if (length(names(additionalParms)) != length(unique(names(additionalParms)))) {
-      stop("The names in the named vector must be unique!")
-    }
-  }
-  .connectToBioSIMClient()
-  jPlots <- .createBioSimPlots(latDeg, longDeg, elevM)
-  jRCP <- J4R::createJavaObject("biosimclient.BioSimEnums$RCP", rcp)
-  jClimModel <- J4R::createJavaObject("biosimclient.BioSimEnums$ClimateModel", climModel)
-  if (is.null(additionalParms)) {
-    jAdditionalParms <- J4R::createJavaObject("biosimclient.BioSimParameterMap", isNullObject = T)
-  } else {
-    jAdditionalParms <- J4R::createJavaObject("biosimclient.BioSimParameterMap")
-    for (name in names(additionalParms)) {
-      jAdditionalParms$addParameter(name, additionalParms[name])
-    }
-  }
-
-
-  map <- J4R::callJavaMethod("biosimclient.BioSimClient",
-                             "getModelOutput",
-                             as.integer(fromYr),
-                             as.integer(toYr),
-                             jPlots,
-                             jRCP,
-                             jClimModel,
-                             modelName,
-                             as.integer(rep),
-                             as.integer(repModel),
-                             isEphemeral,
-                             jAdditionalParms)
-
-  mapSize <- map$size()
-  listSize <- jPlots$size()
-  if (mapSize != listSize) {
-    print(paste("The map has size =", mapSize, "while the list has size =", listSize))
-  }
-
-  outputBioSimDataSet <- J4R::callJavaMethod("biosimclient.BioSimDataSet", "convertLinkedHashMapToBioSimDataSet", map)
-  outputDataFrame <- .convertJavaDataSetIntoDataFrame(outputBioSimDataSet)
-  outputDataFrame <- .setKeyID(outputDataFrame, id)
-  return(outputDataFrame)
+  .Deprecated(new = "generateModelOutput",
+              msg = "Function generateModelOutput is deprecated. Please use the generateWeather function.")
 }
-
-
 
 
 .setKeyID <- function(outputDataFrame, id) {
@@ -407,7 +349,7 @@ generateModelOutput <- function(modelName, fromYr, toYr, id, latDeg, longDeg,
 }
 
 #'
-#' Clear the cache of the client
+#' Clear the cache of the client (DEPRECATED).
 #'
 #' When using the weather generator, some objects are stored in memory on the server and
 #' a reference is stored in the client, so that subsequent calls on models for the same
@@ -422,5 +364,132 @@ generateModelOutput <- function(modelName, fromYr, toYr, id, latDeg, longDeg,
 #'
 #' @export
 clearCache <- function() {
-  J4R::callJavaMethod("biosimclient.BioSimClient", "clearCache")
+  .Deprecated(new = "clearCache",
+              msg = "This function is now useless.")
+  #  J4R::callJavaMethod("biosimclient.BioSimClient", "clearCache")
 }
+
+
+
+#'
+#' Generate a meteorological time series and apply one or many models.
+#'
+#' This function generated a meteorological time series for some locations
+#' and applies one or many models on this series.
+#'
+#' @param modelNames a character or a vector of character. Should be one or some models listed in the available models (see the getModelList() method)
+#' @param fromYr the starting date (yr) of the period (inclusive)
+#' @param toYr the ending date (yr) of the period (inclusive)
+#' @param id a vector with the ids of the plots
+#' @param latDeg the latitudes of the plots
+#' @param longDeg the longitudes of the plots
+#' @param elevM the elevations of the plots (can contain some NA or can be NULL, in which cases BioSim relies on a digital elevation model)
+#' @param rep number of replicates of generated climate (is set to 1 by default)
+#' @param repModel number of replicates on the model end (is set to 1 by default)
+#' @param rcp an representative concentration pathway (either "RCP45" or "RCP85")
+#' @param climModel a climatic model (either "RCM4", "GCM4" or "Hadley")
+#' @param additionalParms a list of named vectors with the additional parameters if needed
+#'
+#' @return a list of data.frame objects
+#'
+#' @examples
+#'
+#' locations <- BioSIM::twoLocationsInSouthernQuebec
+#' addParms <- c("LowerThreshold"=5)
+#' \dontrun{
+#' degreeDays <- generateWeather("DegreeDay_Annual", 2017, 2021, locations$Name, locations$Latitude,
+#'                    locations$Longitude, locations$Elevation,
+#'                    rcp = "RCP85", climModel = "GCM4",
+#'                    additionalParms = list(addParms))}
+#'
+#' @export
+generateWeather <- function(modelNames, fromYr, toYr, id, latDeg, longDeg,
+                            elevM = rep(NA, length(longDeg)), rep = 1,
+                            repModel = 1, rcp = "RCP45", climModel = "RCM4",
+                            additionalParms = NULL) {
+#  For debugging
+  # locations <- twoLocationsInSouthernQuebec
+  # fromYr <- 1998
+  # toYr <- 2006
+  # id <- locations$id
+  # latDeg <- locations$latDeg
+  # longDeg <- locations$longDeg
+  # elevM <- locations$elevM
+  # modelNames <- "DegreeDay_Annual"
+  # additionalParms <- NULL
+  # rcp <- "RCP45"
+  # climModel <- "RCM4"
+  # rep <- 1
+  # repModel <- 1
+  # additionalParms <- NULL
+
+  elevM <- .checkInputAndFormatIfNeeded(id, latDeg, longDeg, elevM)
+
+  # if (length(id) != length(latDeg)) {
+  #   stop("The arguments id, latDeg, longDeg and elevM must have the same length!")
+  # }
+  if (!is.null(additionalParms)) {
+    if (is.list(additionalParms)) {
+      for (item in additionalParms) {
+        if (!is.null(item) && is.null(names(item))) {
+          stop("The element of the additionalParms list instance must be named vectors!")
+        }
+      }
+    } else {
+      stop("The additionalParms argument must be a list of named vectors or NULL!")
+    }
+  }
+  .connectToBioSIMClient()
+  jPlots <- .createBioSimPlots(latDeg, longDeg, elevM)
+  jRCP <- J4R::createJavaObject("biosimclient.BioSimEnums$RCP", rcp)
+  jClimModel <- J4R::createJavaObject("biosimclient.BioSimEnums$ClimateModel", climModel)
+  if (is.null(additionalParms)) {
+    jAdditionalParmsList <- J4R::createJavaObject("java.util.ArrayList", isNullObject = T)
+  } else {
+    jAdditionalParmsList <- J4R::createJavaObject("java.util.ArrayList")
+    for (item in additionalParms) {
+      if (is.null(item)) {
+        jAdditionalParmsList$add(J4R::createJavaObject("biosimclient.BioSimParameterMap", isNullObject = T))
+      } else {
+        jAdditionalParms <- J4R::createJavaObject("biosimclient.BioSimParameterMap")
+        jAdditionalParmsList$add(jAdditionalParms)
+        for (name in names(item)) {
+          jAdditionalParms$addParameter(name, item[name])
+        }
+      }
+    }
+  }
+
+  jModelList <- J4R::createJavaObject("java.util.ArrayList")
+  jModelList$add(modelNames)
+
+  map <- J4R::callJavaMethod("biosimclient.BioSimClient",
+                             "generateWeather",
+                             as.integer(fromYr),
+                             as.integer(toYr),
+                             jPlots,
+                             jRCP,
+                             jClimModel,
+                             jModelList,
+                             as.integer(rep),
+                             as.integer(repModel),
+                             jAdditionalParmsList)
+
+  listSize <- jPlots$size()
+  outputList <- list()
+  for (i in 0:(jModelList$size() - 1)) {
+    thisModelName <- jModelList$get(i)
+    innerMap <- map$get(thisModelName)
+    innerMapSize <- innerMap$size()
+    if (innerMapSize != listSize) {
+      stop(paste("The map has size =", mapSize, "while the list has size =", listSize))
+    }
+    outputBioSimDataSet <- J4R::callJavaMethod("biosimclient.BioSimDataSet", "convertLinkedHashMapToBioSimDataSet", innerMap)
+    outputDataFrame <- .convertJavaDataSetIntoDataFrame(outputBioSimDataSet)
+    outputDataFrame <- .setKeyID(outputDataFrame, id)
+    outputList[[thisModelName]] <- outputDataFrame
+  }
+  return(outputList)
+}
+
+

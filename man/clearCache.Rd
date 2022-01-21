@@ -2,7 +2,7 @@
 % Please edit documentation in R/bioSimClientFunctions.R
 \name{clearCache}
 \alias{clearCache}
-\title{Clear the cache of the client}
+\title{Clear the cache of the client (DEPRECATED).}
 \usage{
 clearCache()
 }
