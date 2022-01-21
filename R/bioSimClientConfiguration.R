@@ -5,6 +5,8 @@
 ########################################################
 
 
+bioSimFilename <- "biosimclient-1.1.jar"
+
 .welcomeMessage <- function() {
   packageStartupMessage("Welcome to BioSIM!")
   packageStartupMessage("The BioSIM package implements a client that retrieves climate variable from the")
@@ -43,19 +45,39 @@
   return(dataFrame)
 }
 
+.getLibraryPath <- function(packageName, myJavaLibrary) {
+  filename <- system.file("inst", myJavaLibrary, package = packageName)
+  if (file.exists(filename)) {
+    filePath <- filename
+  }
+  else {
+    filename <- system.file(myJavaLibrary, package = packageName)
+    if (file.exists(filename)) {
+      filePath <- filename
+    }
+    else {
+      filePath <- NULL
+    }
+  }
+  return(filePath)
+}
+
 
 .loadBioSIMClient <- function() {
-  if (!J4R::checkIfClasspathContains("biosimclient.jar")) {
-    J4R::addToClassPath("biosimclient.jar", packageName = "BioSIM")
+  path <- .getLibraryPath("BioSIM", bioSimFilename)
+  J4R::connectToJava(extensionPath = path)
+  if (!J4R::checkIfClasspathContains(bioSimFilename)) {
+    stop("It seems J4R has not been able to load the biosim library.")
   }
 }
 
 
 .connectToBioSIMClient <- function() {
   if (!J4R::isConnectedToJava()) {
-    J4R::connectToJava()
+    .loadBioSIMClient()
+  } else if (!J4R::checkIfClasspathContains(bioSimFilename)) {
+    stop("Java is running but biosim is not part of the classpath! Please shutdown Java through the shutdownClient method first!")
   }
-  .loadBioSIMClient()
 }
 
 #'
@@ -71,15 +93,6 @@
 #'
 #' @export
 shutdownJava <- function() {
-  tryCatch ({
-    if (J4R::isConnectedToJava() && J4R::checkIfClasspathContains("biosimclient.jar")) {
-      message("Clearing out the client cache. This may take a while...")
-      clearCache()
-    }
-  },
-  error = function(cond) {
-    message("An error occurred while attempting to clear the cache!")
-  })
   J4R::shutdownJava()
 }
 
@@ -97,15 +110,6 @@ shutdownJava <- function() {
 #'
 #' @export
 shutdownClient <- function() {
-  tryCatch ({
-    if (J4R::isConnectedToJava() && J4R::checkIfClasspathContains("biosimclient.jar")) {
-      message("Clearing out the client cache. This may take a while...")
-      clearCache()
-    }
-  },
-  error = function(cond) {
-    message("An error occurred while attempting to clear the cache!")
-  })
   J4R::shutdownClient()
 }
 

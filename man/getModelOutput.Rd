@@ -2,7 +2,7 @@
 % Please edit documentation in R/bioSimClientFunctions.R
 \name{getModelOutput}
 \alias{getModelOutput}
-\title{Generate climate and apply a model.}
+\title{Generate climate and apply a model (DEPRECATED).}
 \usage{
 getModelOutput(
   fromYr,
