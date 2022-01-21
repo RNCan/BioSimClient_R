@@ -482,7 +482,7 @@ generateWeather <- function(modelNames, fromYr, toYr, id, latDeg, longDeg,
     innerMap <- map$get(thisModelName)
     innerMapSize <- innerMap$size()
     if (innerMapSize != listSize) {
-      stop(paste("The map has size =", mapSize, "while the list has size =", listSize))
+      stop(paste("The map has size =", innerMapSize, "while the list has size =", listSize))
     }
     outputBioSimDataSet <- J4R::callJavaMethod("biosimclient.BioSimDataSet", "convertLinkedHashMapToBioSimDataSet", innerMap)
     outputDataFrame <- .convertJavaDataSetIntoDataFrame(outputBioSimDataSet)
