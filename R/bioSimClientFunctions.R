@@ -25,16 +25,13 @@
 allMonths <- c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
 
 .createBioSimPlots <- function(latDeg, longDeg, elevM) {
-#  if (length(latDeg) == length(longDeg)) {
-#    if (length(latDeg) == length(elevM)) {
   jList <- J4R::createJavaObject("java.util.ArrayList")
   jPlots <- J4R::createJavaObject("biosimclient.BioSimPlotImpl", latDeg, longDeg, elevM)
   jList$add(jPlots)
   return(jList)
-#    }
-#  }
-#  stop("createBioSimPlots: The arguments of the function are not of the same length!")
 }
+
+
 
 
 #'
@@ -71,9 +68,6 @@ getNormals <- function(period, id, latDeg, longDeg, elevM = rep(NA, length(longD
   # longDeg <- locations$longDeg
   # elevM <- locations$elevM
   elevM <- .checkInputAndFormatIfNeeded(id, latDeg, longDeg, elevM)
-  # if (length(id) != length(latDeg)) {
-  #   stop("The arguments id, latDeg, longDeg and elevM must have the same length!")
-  # }
   if (!is.null(averageOverTheseMonths) && length(averageOverTheseMonths) > 0) {
     for (month in averageOverTheseMonths) {
       if (!(month %in% allMonths)) {
@@ -82,7 +76,8 @@ getNormals <- function(period, id, latDeg, longDeg, elevM = rep(NA, length(longD
     }
   }
 
-  .connectToBioSIMClient()
+  connectToBioSIMClient()
+  .isClientSupported()
   jPlots <- .createBioSimPlots(latDeg, longDeg, elevM)
 
   jAverageOverTheseMonths <- J4R::createJavaObject("java.util.ArrayList")
@@ -175,7 +170,8 @@ getMonthlyNormals <- function(period, id, latDeg, longDeg, elevM = rep(NA, lengt
 #'
 #' @export
 getModelList <- function() {
-  .connectToBioSIMClient()
+  connectToBioSIMClient()
+  .isClientSupported
   jList <- J4R::callJavaMethod("biosimclient.BioSimClient", "getModelList")
   return(J4R::getAllValuesFromListObject(jList))
 }
@@ -192,7 +188,8 @@ getModelList <- function() {
 #'
 #' @export
 getModelHelp <- function(modelName) {
-  .connectToBioSIMClient()
+  connectToBioSIMClient()
+  .isClientSupported()
   return(cat(J4R::callJavaMethod("biosimclient.BioSimClient", "getModelHelp", modelName)))
 }
 
@@ -208,7 +205,8 @@ getModelHelp <- function(modelName) {
 #'
 #' @export
 getModelDefaultParameters <- function(modelName) {
-  .connectToBioSIMClient()
+  connectToBioSIMClient()
+  .isClientSupported()
   defParms <- J4R::callJavaMethod("biosimclient.BioSimClient", "getModelDefaultParameters", modelName)
   str <- defParms$toString()
   strSplit <- strsplit(str, "\\*")[[1]]
@@ -425,9 +423,6 @@ generateWeather <- function(modelNames, fromYr, toYr, id, latDeg, longDeg,
 
   elevM <- .checkInputAndFormatIfNeeded(id, latDeg, longDeg, elevM)
 
-  # if (length(id) != length(latDeg)) {
-  #   stop("The arguments id, latDeg, longDeg and elevM must have the same length!")
-  # }
   if (!is.null(additionalParms)) {
     if (is.list(additionalParms)) {
       for (item in additionalParms) {
@@ -439,7 +434,8 @@ generateWeather <- function(modelNames, fromYr, toYr, id, latDeg, longDeg,
       stop("The additionalParms argument must be a list of named vectors or NULL!")
     }
   }
-  .connectToBioSIMClient()
+  connectToBioSIMClient()
+  .isClientSupported()
   jPlots <- .createBioSimPlots(latDeg, longDeg, elevM)
   jRCP <- J4R::createJavaObject("biosimclient.BioSimEnums$RCP", rcp)
   jClimModel <- J4R::createJavaObject("biosimclient.BioSimEnums$ClimateModel", climModel)

@@ -13,6 +13,8 @@
 
 library(BioSIM)
 
+biosimclient.config(isLocalConnectionEnabled = T, isTestModeEnabled = T)
+
 latDeg <- runif(n = 3, min=48, max=51)
 longDeg <- runif(n = 3, min=-76, max=-66)
 ids <- c("plot1", "plot1", "plot2")
@@ -212,6 +214,8 @@ test_that("Testing degree-days above 5C in 2017 and 2018 are generated and not c
   expect_equal(all(degreeDays1$DD != 0), TRUE)
 })
 biosimclient.config()  ### reset the configuration
+biosimclient.config(isLocalConnectionEnabled = T, isTestModeEnabled = T)
+
 
 
 biosimclient.config(nbNearestNeighbours = 20)
@@ -221,6 +225,8 @@ test_that("Testing degree-days above 5C in 2017 and 2018 for 20 nearest neighbou
   expect_equal(degreeDays[which(degreeDays$KeyID == "lostSomewhere" & degreeDays$Year == 2018),"DD"], 1249.3, tolerance = 1E-4)
 })
 biosimclient.config()  ### reset the configuration
+biosimclient.config(isLocalConnectionEnabled = T, isTestModeEnabled = T)
+
 
 
 addParms <- getModelDefaultParameters("DegreeDay_Annual")
@@ -246,6 +252,8 @@ test_that("Testing that we get 120 observations", {
   expect_equal(length(ClimaticQc_Annual[,1]), 120)
 })
 biosimclient.config()
+biosimclient.config(isLocalConnectionEnabled = T, isTestModeEnabled = T)
+
 
 
 annualMean <- getAnnualNormals("1981_2010", locations$Name, locations$Latitude, locations$Longitude, locations$Elevation)
@@ -258,6 +266,8 @@ ClimaticQc_Annual <- generateWeather("ClimaticQc_Annual",
                                     locations$Elevation,
                                     rep=10)[["ClimaticQc_Annual"]]
 biosimclient.config()
+biosimclient.config(isLocalConnectionEnabled = T, isTestModeEnabled = T)
+
 
 ClimaticQc_Annual_moy <- aggregate(ClimaticQc_Annual[, c(8,11,13)], list(ClimaticQc_Annual$KeyID), mean)
 colnames(ClimaticQc_Annual_moy) <- c("KeyID", "P", "TN", "TX")
@@ -278,7 +288,7 @@ test_that("Testing that we get 240 observations when simulating 2 locations x 30
   expect_equal(length(ClimaticQc_Annual[,1]), 240)
 })
 biosimclient.config()
-
+biosimclient.config(isLocalConnectionEnabled = T, isTestModeEnabled = T)
 
 
 shutdownClient()
