@@ -7,6 +7,8 @@
 
 bioSimFilename <- "biosimclient-1.1.jar"
 
+.warningMessage <- NULL
+
 .welcomeMessage <- function() {
   packageStartupMessage("Welcome to BioSIM!")
   packageStartupMessage("The BioSIM package implements a client that retrieves climate variable from the")
@@ -71,14 +73,25 @@ bioSimFilename <- "biosimclient-1.1.jar"
   }
 }
 
-
-.connectToBioSIMClient <- function() {
+connectToBioSIMClient <- function() {
   if (!J4R::isConnectedToJava()) {
     .loadBioSIMClient()
   } else if (!J4R::checkIfClasspathContains(bioSimFilename)) {
     stop("Java is running but biosim is not part of the classpath! Please shutdown Java through the shutdownClient method first!")
   }
 }
+
+
+.isClientSupported <- function() {
+  if (is.null(.warningMessage)) {
+    .isClientSupported <- J4R::callJavaMethod("biosimclient.BioSimClient", "isClientSupported")
+    .warningMessage <- J4R::callJavaMethod("biosimclient.BioSimClient", "isClientSupported")
+    if (.warningMessage != "") {
+      message(.warningMessage)
+    }
+  }
+}
+
 
 #'
 #' Shut down the Java server
@@ -136,12 +149,15 @@ shutdownClient <- function() {
 #' @param nbNearestNeighbours an integer
 #'
 #' @export
-biosimclient.config <- function(forceClimateGenerationEnabled = NULL, nbNearestNeighbours = NULL) {
+biosimclient.config <- function(forceClimateGenerationEnabled = NULL,
+                                nbNearestNeighbours = NULL,
+                                isLocalConnectionEnabled = NULL,
+                                isTestModeEnabled = NULL) {
   if (!is.null(forceClimateGenerationEnabled)) {
     if (!is.logical(forceClimateGenerationEnabled)) {
       stop("The forceClimateGenerationEnabled parameter must be a logical!")
     } else {
-      .connectToBioSIMClient()
+      connectToBioSIMClient()
       J4R::callJavaMethod("biosimclient.BioSimClient", "setForceClimateGenerationEnabled", forceClimateGenerationEnabled)
     }
   }
@@ -150,13 +166,36 @@ biosimclient.config <- function(forceClimateGenerationEnabled = NULL, nbNearestN
     if (!is.numeric(nbNearestNeighbours)) {
       stop("The nbNearestNeighbours parameter must be an integer!")
     } else {
-      .connectToBioSIMClient()
+      connectToBioSIMClient()
       J4R::callJavaMethod("biosimclient.BioSimClient", "setNbNearestNeighbours", as.integer(nbNearestNeighbours))
     }
   }
 
-  if (is.null(forceClimateGenerationEnabled) && is.null(nbNearestNeighbours)) {
-    .connectToBioSIMClient()
+  if (!is.null(isLocalConnectionEnabled)) {
+    if (!is.logical(isLocalConnectionEnabled)) {
+      stop("The isLocalConnectionEnabled parameter must be a logical!")
+    } else {
+      connectToBioSIMClient()
+      J4R::callJavaMethod("biosimclient.BioSimClient", "setLocalConnectionEnabled", isLocalConnectionEnabled)
+    }
+  }
+
+  if (!is.null(isTestModeEnabled)) {
+    if (!is.logical(isTestModeEnabled)) {
+      stop("The isTestModeEnabled parameter must be a logical!")
+    } else {
+      connectToBioSIMClient()
+      J4R::callJavaMethod("biosimclient.BioSimClient", "setTestModeEnabled", isTestModeEnabled)
+    }
+  }
+
+
+
+  if (is.null(forceClimateGenerationEnabled)
+      && is.null(nbNearestNeighbours)
+      && is.null(isLocalConnectionEnabled)
+      && is.null(isTestModeEnabled)) {
+    connectToBioSIMClient()
     J4R::callJavaMethod("biosimclient.BioSimClient", "resetClientConfiguration")
     message("The configuration of the client has been reset to its default value!")
   }
@@ -176,11 +215,16 @@ biosimclient.config <- function(forceClimateGenerationEnabled = NULL, nbNearestN
 #'
 #' @export
 biosimclient.getConfiguration <- function() {
-  .connectToBioSIMClient()
+  connectToBioSIMClient()
   isForceClimateGenerationEnabled <- J4R::callJavaMethod("biosimclient.BioSimClient", "isForceClimateGenerationEnabled")
   nbNearestNeighbours <- J4R::callJavaMethod("biosimclient.BioSimClient", "getNbNearestNeighbours")
-  setting <- c("isForceClimateGenerationEnabled", "nbNearestNeighbours")
-  value <- c(as.character(isForceClimateGenerationEnabled), as.character(nbNearestNeighbours))
+  isLocal <- J4R::callJavaMethod("biosimclient.BioSimClient", "isLocalConnectionEnabled")
+  isTesting <- J4R::callJavaMethod("biosimclient.BioSimClient", "isTestModeEnabled")
+  setting <- c("isForceClimateGenerationEnabled", "nbNearestNeighbours", "isLocalConnectionEnabled", "isTestModeEnabled")
+  value <- c(as.character(isForceClimateGenerationEnabled),
+             as.character(nbNearestNeighbours),
+             as.character(isLocal),
+             as.character(isTesting))
   return(data.frame(setting, value))
 }
 

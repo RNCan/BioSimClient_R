@@ -6,7 +6,9 @@
 \usage{
 biosimclient.config(
   forceClimateGenerationEnabled = NULL,
-  nbNearestNeighbours = NULL
+  nbNearestNeighbours = NULL,
+  isLocalConnectionEnabled = NULL,
+  isTestModeEnabled = NULL
 )
 }
 \arguments{
