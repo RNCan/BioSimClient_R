@@ -15,6 +15,10 @@ biosimclient.config(
 \item{forceClimateGenerationEnabled}{a logical}
 
 \item{nbNearestNeighbours}{an integer}
+
+\item{isLocalConnectionEnabled}{a logical (only for test purposes)}
+
+\item{isTestModeEnabled}{a logical (only for test purpose)}
 }
 \description{
 The forceClimateGenerationEnabled argument forces BioSIM to generate climate for past dates instead of

@@ -14,7 +14,7 @@ bioSimFilename <- "biosimclient-1.1.jar"
   packageStartupMessage("The BioSIM package implements a client that retrieves climate variable from the")
   packageStartupMessage("original BioSIM application hosted on a server. ")
   packageStartupMessage("Please, make sure that Java (version 8 or later) is installed on your computer.")
-  packageStartupMessage("For more information, visit https://sourceforge.net/p/mrnfforesttools/biosimclient/wiki/Home/.")
+  packageStartupMessage("For more information, visit https://sourceforge.net/p/mrnfforesttools/biosimclient/wiki/BioSIM-R/.")
 }
 
 .onAttach <- function(libname, pkgname) {
@@ -147,6 +147,8 @@ shutdownClient <- function() {
 #'
 #' @param forceClimateGenerationEnabled a logical
 #' @param nbNearestNeighbours an integer
+#' @param isLocalConnectionEnabled a logical (only for test purposes)
+#' @param isTestModeEnabled a logical (only for test purpose)
 #'
 #' @export
 biosimclient.config <- function(forceClimateGenerationEnabled = NULL,
