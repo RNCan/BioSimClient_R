@@ -22,12 +22,10 @@ latDeg <- runif(n = 3, min=48, max=51)
 longDeg <- runif(n = 3, min=-76, max=-66)
 ids <- c("plot1", "plot1", "plot2")
 
-#### FAIL WITH ERROR ON THE SERVER - TODO reenable this test after multiprocessing implementation ####
-# testWithSameIds <- generateWeather("DegreeDay_Annual", 1999, 2000, ids, latDeg, longDeg)
-# test_that("Testing that replicated ids do not interfere", {
-#   expect_equal(nrow(testWithSameIds), 6)
-# })
-
+testWithSameIds <- generateWeather("DegreeDay_Annual", 1999, 2000, ids, latDeg, longDeg)
+test_that("Testing that replicated ids do not interfere", {
+   expect_equal(nrow(testWithSameIds$DegreeDay_Annual), 6)
+})
 
 output <- generateWeather("DegreeDay_Annual", 1990, 1990, "Reservoir Gouin", 48.5, -74.5, NA)[["DegreeDay_Annual"]]
 
@@ -292,6 +290,18 @@ test_that("Testing that we get 240 observations when simulating 2 locations x 30
 })
 biosimclient.config()
 biosimclient.config(isLocalConnectionEnabled = biosimLocal, isTestModeEnabled = T)
+
+
+modelList <- getModelList()
+
+for (model in modelList) {
+  a <- getModelDefaultParameters(model)
+  test_that(paste("Testing that default parameters can be retrieved for", model), {
+    expect_true(!is.null(a))
+  })
+}
+
+
 
 
 shutdownClient()
