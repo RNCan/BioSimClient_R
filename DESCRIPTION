@@ -1,7 +1,7 @@
 Package: BioSIM
 Type: Package
 Title: 'BioSIM' Client for Climate Variables 
-Version: 1.0.0-47
+Version: 1.0.0-48
 Author: Mathieu Fortin and Remi Saint-Amant, Canadian Forest Service
 Maintainer: Mathieu Fortin <mathieu.fortin.re@gmail.com>
 Copyright: Her Majesty the Queen in right of Canada
