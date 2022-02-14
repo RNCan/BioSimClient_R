@@ -182,13 +182,13 @@ test_that("Testing degree-days between 2017 and 2021 under RCP 8.5 and climate m
   expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2017),"DD"], 2851.30, toletance = 1E-4)
   expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2018),"DD"], 2741.35, toletance = 1E-4)
   expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2019),"DD"], 2611.30, toletance = 1E-4)
-  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2020),"DD"], 2793.90, toletance = 1E-4)
-  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2021),"DD"], 3184.45, toletance = 1E-4)
+  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2020),"DD"], 2783.15, toletance = 1E-4)
+  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2021),"DD"], 3173.75, toletance = 1E-4)
   expect_equal(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2017),"DD"], 3552.60, toletance = 1E-4)
   expect_equal(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2018),"DD"], 3454.60, toletance = 1E-4)
   expect_equal(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2019),"DD"], 3266.15, toletance = 1E-4)
   expect_equal(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2020),"DD"], 3539.65, toletance = 1E-4)
-  expect_equal(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2021),"DD"], 3806.00, toletance = 1E-4)
+  expect_equal(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2021),"DD"], 3803.15, toletance = 1E-4)
 })
 
 degreeDays <- generateWeather("DegreeDay_Annual", 2017, 2018,
