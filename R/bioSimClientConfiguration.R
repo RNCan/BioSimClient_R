@@ -11,10 +11,10 @@ bioSimFilename <- "biosimclient-1.1.jar"
 
 .welcomeMessage <- function() {
   packageStartupMessage("Welcome to BioSIM!")
-  packageStartupMessage("The BioSIM package implements a client that retrieves climate variable from the")
-  packageStartupMessage("original BioSIM application hosted on a server. ")
+  packageStartupMessage("The BioSIM package implements a client that retrieves climate variables from the")
+  packageStartupMessage("original BioSIM application hosted on a server.")
   packageStartupMessage("Please, make sure that Java (version 8 or later) is installed on your computer.")
-  packageStartupMessage("For more information, visit https://sourceforge.net/p/mrnfforesttools/biosimclient/wiki/BioSIM-R/.")
+  packageStartupMessage("For more information, visit https://github.com/RNCan/BioSimClient_R/wiki.")
 }
 
 .onAttach <- function(libname, pkgname) {
