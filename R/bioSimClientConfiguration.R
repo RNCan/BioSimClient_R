@@ -48,18 +48,12 @@ bioSimFilename <- "biosimclient-1.1.jar"
 }
 
 .getLibraryPath <- function(packageName, myJavaLibrary) {
-  filename <- system.file("inst", myJavaLibrary, package = packageName)
+  filename <- system.file(myJavaLibrary, package = packageName)
   if (file.exists(filename)) {
     filePath <- filename
   }
   else {
-    filename <- system.file(myJavaLibrary, package = packageName)
-    if (file.exists(filename)) {
-      filePath <- filename
-    }
-    else {
-      filePath <- NULL
-    }
+    filePath <- NULL
   }
   return(filePath)
 }
