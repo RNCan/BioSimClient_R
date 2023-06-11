@@ -115,6 +115,18 @@ test_that("Testing that 1981-2010 summer normals for Quebec and Sorel can be pro
   expect_equal(summerMean[which(summerMean$KeyID == "Sorel"),"P"], 302.9, tolerance = 1E-4)
 })
 
+normals <- getAnnualNormals("1991_2020", locations$Name, locations$Latitude, locations$Longitude, locations$Elevation)
+
+test_that("Testing that 1991_2020 annual normals for Quebec and Sorel can be properly retrieved", {
+  expect_equal(normals[which(normals$KeyID == "Quebec"),"TN"], 0.5813699, tolerance = 1E-4)
+  expect_equal(normals[which(normals$KeyID == "Quebec"),"TX"], 9.904384, tolerance = 1E-4)
+  expect_equal(normals[which(normals$KeyID == "Quebec"),"P"], 1208.1, tolerance = 1E-4)
+  expect_equal(normals[which(normals$KeyID == "Sorel"),"TN"], 2.3504110, tolerance = 1E-4)
+  expect_equal(normals[which(normals$KeyID == "Sorel"),"TX"], 11.506575, tolerance = 1E-4)
+  expect_equal(normals[which(normals$KeyID == "Sorel"),"P"], 1083.0, tolerance = 1E-4)
+})
+
+
 normals <- getAnnualNormals("2061_2090", locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, rcp="RCP85", climModel="Hadley")
 
 test_that("Testing that 2061-2090 annual normals under RCP 8.5 and climate model Hadley for Quebec and Sorel can be properly retrieved", {
@@ -182,13 +194,13 @@ test_that("Testing degree-days between 2017 and 2021 under RCP 8.5 and climate m
   expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2017),"DD"], 2851.30, toletance = 1E-4)
   expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2018),"DD"], 2741.35, toletance = 1E-4)
   expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2019),"DD"], 2611.30, toletance = 1E-4)
-  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2020),"DD"], 2783.15, toletance = 1E-4)
-  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2021),"DD"], 3075.70, toletance = 1E-4)
+  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2020),"DD"], 2792.45, toletance = 1E-4)
+  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2021),"DD"], 3178.70, toletance = 1E-4)
   expect_equal(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2017),"DD"], 3552.60, toletance = 1E-4)
   expect_equal(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2018),"DD"], 3454.60, toletance = 1E-4)
   expect_equal(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2019),"DD"], 3266.15, toletance = 1E-4)
   expect_equal(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2020),"DD"], 3539.65, toletance = 1E-4)
-  expect_equal(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2021),"DD"], 3532.50, toletance = 1E-4)
+  expect_equal(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2021),"DD"], 3803.15, toletance = 1E-4)
 })
 
 degreeDays <- generateWeather("DegreeDay_Annual", 2017, 2018,

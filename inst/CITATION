@@ -1,0 +1,15 @@
+citHeader("To cite BioSIM in publications use:")
+
+citEntry(
+  entry    = "Article",
+  title    = "A Web API for weather generation and pest development simulation in North America",
+  author   = personList(as.person("M. Fortin"), as.person("J.-F. Lavoie"), as.person("J. Regniere"), as.person("R. Saint-Amant")),
+  journal  = "Environmental Modelling and Software",
+  year     = "2022",
+  volume   = "157",
+  pages    = "105476",
+  url      = "https://doi.org/10.1016/j.envsoft.2022.105476",
+  textVersion = paste(
+  "Fortin, M., J.-F. Lavoie, J. Regniere, and R. Saint-Amant. 2022. A Web API for weather generation and pest development simulation in North America. Environmental Modelling and Software 157:105476. doi: 10.1016/j.envsoft.2022.105476"
+  )
+)
