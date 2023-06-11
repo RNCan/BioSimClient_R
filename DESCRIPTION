@@ -1,20 +1,22 @@
 Package: BioSIM
 Type: Package
-Title: 'BioSIM' Client for Climate Variables 
-Version: 1.0.2
-Author: Mathieu Fortin and Remi Saint-Amant, Canadian Forest Service
-Maintainer: Mathieu Fortin <mathieu.fortin.re@gmail.com>
-Copyright: Her Majesty the Queen in right of Canada
+Title: 'BioSIM' Client for 'BioSIM' Web API 
+Version: 1.0.3
+Authors@R: c(
+    person("Mathieu", "Fortin", email = "mathieu.fortin.re@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6436-2727")),
+    person("Remi", "Saint-Amant", email="remi.saint-amant@nrcan-rncan.gc.ca", role=c("ctb")),
+    person("His Majesty the King in right of Canada", role=c("cph")))
 Description: Provide a client that retrieves the climate variables from the original 'BioSIM' application
-   hosted on a server. The 'BioSIM' application is being developed by the Canadian Forest Service.
+   hosted on a server. The 'BioSIM' application is being developed and maintained by the Canadian Forest Service.
 URL: https://github.com/RNCan/BioSimClient_R/wiki
 Depends: R (>= 3.5.0)
 Imports: 
     J4R (>= 1.1.9)
 License: LGPL-3
+BugReports: https://github.com/RNCan/BioSimClient_R/issues
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 SystemRequirements: Java 8
 Suggests: 
     testthat
