@@ -7,7 +7,13 @@
 
 bioSimFilename <- "biosimclient-1.1.jar"
 
-.warningMessage <- NULL
+#'
+#' The settings environment for this package
+#'
+#' This environment contains the general settings of the package.
+#'
+#' @export
+settingEnv <- new.env()
 
 .welcomeMessage <- function() {
   packageStartupMessage("Welcome to BioSIM!")
@@ -77,11 +83,12 @@ connectToBioSIMClient <- function() {
 
 
 .isClientSupported <- function() {
-  if (is.null(.warningMessage)) {
-    .isClientSupported <- J4R::callJavaMethod("biosimclient.BioSimClient", "isClientSupported")
-    .warningMessage <- J4R::callJavaMethod("biosimclient.BioSimClient", "isClientSupported")
-    if (.warningMessage != "") {
-      message(.warningMessage)
+  if (!exists("warningMessage", envir = settingEnv, inherits = F)) {  # means no prior connection to the server
+#    .isClientSupported <- J4R::callJavaMethod("biosimclient.BioSimClient", "isClientSupported")
+    warningMessage <- J4R::callJavaMethod("biosimclient.BioSimClient", "isClientSupported")
+    assign("warningMessage", warningMessage, envir = settingEnv, inherits = F)
+    if (warningMessage != "") {
+      message(warningMessage)
     }
   }
 }
@@ -100,6 +107,9 @@ connectToBioSIMClient <- function() {
 #'
 #' @export
 shutdownJava <- function() {
+  if (exists("warningMessage", envir = settingEnv, inherits = F)) {  # means no prior connection to the server
+    rm("warningMessage", envir = settingEnv, inherits = F)
+  }
   J4R::shutdownJava()
 }
 
@@ -117,6 +127,9 @@ shutdownJava <- function() {
 #'
 #' @export
 shutdownClient <- function() {
+  if (exists("warningMessage", envir = settingEnv, inherits = F)) {  # means no prior connection to the server
+    rm("warningMessage", envir = settingEnv, inherits = F)
+  }
   J4R::shutdownClient()
 }
 

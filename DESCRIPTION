@@ -1,7 +1,7 @@
 Package: BioSIM
 Type: Package
 Title: 'BioSIM' Client for 'BioSIM' Web API 
-Version: 1.0.3
+Version: 1.0.4
 Authors@R: c(
     person("Mathieu", "Fortin", email = "mathieu.fortin.re@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6436-2727")),
     person("Remi", "Saint-Amant", email="remi.saint-amant@nrcan-rncan.gc.ca", role=c("ctb")),
