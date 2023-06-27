@@ -27,3 +27,5 @@ This package depends on the J4R package.
 
 The installation procedure and the package documentation is available at
 https://github.com/RNCan/BioSimClient_R/wiki . 
+
+More information on BioSIM Web API and its clients can be found at https://github.com/RNCan/BioSimClient_CSharp/wiki.
