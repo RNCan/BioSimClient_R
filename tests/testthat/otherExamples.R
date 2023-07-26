@@ -1,3 +1,6 @@
+
+
+
 library(BioSIM)
 
 locations <- BioSIM::twoLocationsInSouthernQuebec
@@ -48,7 +51,6 @@ fromAnnualValues <- data.frame(x,y)
 
 #geom_point(aes(x=Year, y=TM), obs1951_2020, col="red")
 
-  #### TODO essayer avec les DDays.
 
 
 #### Gardening in Aylmer, QC ####
@@ -93,7 +95,7 @@ system.time({
 shutdownClient()
 
 
-
+#### Mountain pine bark beetle in BC ####
 
 require(BioSIM)
 getModelHelp("MPB_SLR")
@@ -107,3 +109,15 @@ mpb_slr1YrPeriods <- getModelOutput(fromYr = 2011, toYr = 2020, id = "SomewhereI
 
 mpb_slrFuture <- getModelOutput(fromYr = 2025, toYr = 2030, id = "SomewhereInBC", latDeg = 50, longDeg = -97, modelName = "MPB_SLR")
 
+#### Relative humidity in BC ####
+require(BioSIM)
+getModelHelp("Climatic_Monthly")
+Weather <- generateWeather("Climatic_Monthly", fromYr = 1950, toYr = 2100, id = "Around_Kamloops", latDeg = 51, longDeg = -120)
+Climatic_Monthly <- Weather$Climatic_Monthly
+require(ggplot2)
+ggplot() +
+  geom_point(aes(y=MeanRelH, x=Year), Climatic_Monthly[which(Climatic_Monthly$Month==7),]) +
+  geom_vline(xintercept = 2023) +
+  ggtitle("Observed and predicted mean relative humidity in July") +
+  ylab("Mean relative humidity (%)") +
+  ylim(40,80)
