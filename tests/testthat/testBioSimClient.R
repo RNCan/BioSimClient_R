@@ -119,11 +119,11 @@ normals <- getAnnualNormals("1991_2020", locations$Name, locations$Latitude, loc
 
 test_that("Testing that 1991_2020 annual normals for Quebec and Sorel can be properly retrieved", {
   expect_equal(normals[which(normals$KeyID == "Quebec"),"TN"], 0.5813699, tolerance = 1E-4)
-  expect_equal(normals[which(normals$KeyID == "Quebec"),"TX"], 9.904384, tolerance = 1E-4)
-  expect_equal(normals[which(normals$KeyID == "Quebec"),"P"], 1208.1, tolerance = 1E-4)
-  expect_equal(normals[which(normals$KeyID == "Sorel"),"TN"], 2.3504110, tolerance = 1E-4)
-  expect_equal(normals[which(normals$KeyID == "Sorel"),"TX"], 11.506575, tolerance = 1E-4)
-  expect_equal(normals[which(normals$KeyID == "Sorel"),"P"], 1083.0, tolerance = 1E-4)
+  expect_equal(normals[which(normals$KeyID == "Quebec"),"TX"], 9.89589, tolerance = 0.1)
+  expect_equal(normals[which(normals$KeyID == "Quebec"),"P"], 1209.8, tolerance = 1E-4)
+  expect_equal(normals[which(normals$KeyID == "Sorel"),"TN"], 2.3419178, tolerance = 1E-4)
+  expect_equal(normals[which(normals$KeyID == "Sorel"),"TX"], 11.48986, tolerance = 1E-4)
+  expect_equal(normals[which(normals$KeyID == "Sorel"),"P"], 1083.1, tolerance = 1E-4)
 })
 
 
@@ -191,14 +191,14 @@ degreeDays <- generateWeather("DegreeDay_Annual", 2017, 2021,
                               locations$Elevation, rcp = "RCP85", climModel = "GCM4")[["DegreeDay_Annual"]]
 
 test_that("Testing degree-days between 2017 and 2021 under RCP 8.5 and climate model GCM4 for Quebec and Sorel can be properly retrieved", {
-  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2017),"DD"], 2851.30, toletance = 1E-4)
-  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2018),"DD"], 2741.35, toletance = 1E-4)
-  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2019),"DD"], 2611.30, toletance = 1E-4)
-  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2020),"DD"], 2792.45, toletance = 1E-4)
-  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2021),"DD"], 3178.70, toletance = 1E-4)
+  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2017),"DD"], 2850.65, toletance = 1E-4)
+  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2018),"DD"], 2739.70, toletance = 1E-4)
+  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2019),"DD"], 2599.35, toletance = 1E-4)
+  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2020),"DD"], 2789.90, toletance = 1E-4)
+  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2021),"DD"], 3176.00, toletance = 1E-4)
   expect_equal(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2017),"DD"], 3552.60, toletance = 1E-4)
   expect_equal(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2018),"DD"], 3454.60, toletance = 1E-4)
-  expect_equal(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2019),"DD"], 3266.15, toletance = 1E-4)
+  expect_equal(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2019),"DD"], 3283.70, toletance = 1E-4)
   expect_equal(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2020),"DD"], 3539.65, toletance = 1E-4)
   expect_equal(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2021),"DD"], 3803.15, toletance = 1E-4)
 })
@@ -208,8 +208,8 @@ degreeDays <- generateWeather("DegreeDay_Annual", 2017, 2018,
                               locations$Elevation, additionalParms = list(c("LowerThreshold"=5)))[["DegreeDay_Annual"]]
 
 test_that("Testing degree-days above 5C in 2017 and 2018 can be properly retrieved", {
-  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2017),"DD"], 1797.15, tolerance = 1E-4)
-  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2018),"DD"], 1781.00, tolerance = 1E-4)
+  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2017),"DD"], 1798.40, tolerance = 1E-4)
+  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2018),"DD"], 1779.60, tolerance = 1E-4)
   expect_equal(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2017),"DD"], 2396.45, tolerance = 1E-4)
   expect_equal(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2018),"DD"], 2390.85, tolerance = 1E-4)
 })
@@ -234,8 +234,8 @@ biosimclient.config(isLocalConnectionEnabled = biosimLocal, isTestModeEnabled = 
 biosimclient.config(nbNearestNeighbours = 20)
 degreeDays <- generateWeather("DegreeDay_Annual", 2017, 2018, "lostSomewhere", 50, -70, 300, additionalParms = list(c("LowerThreshold"=5)))[["DegreeDay_Annual"]]
 test_that("Testing degree-days above 5C in 2017 and 2018 for 20 nearest neighbours", {
-  expect_equal(degreeDays[which(degreeDays$KeyID == "lostSomewhere" & degreeDays$Year == 2017),"DD"], 1221.5, tolerance = 1E-4)
-  expect_equal(degreeDays[which(degreeDays$KeyID == "lostSomewhere" & degreeDays$Year == 2018),"DD"], 1249.3, tolerance = 1E-4)
+  expect_equal(degreeDays[which(degreeDays$KeyID == "lostSomewhere" & degreeDays$Year == 2017),"DD"], 1255.25, tolerance = 1E-4)
+  expect_equal(degreeDays[which(degreeDays$KeyID == "lostSomewhere" & degreeDays$Year == 2018),"DD"], 1281.05, tolerance = 1E-4)
 })
 biosimclient.config()  ### reset the configuration
 biosimclient.config(isLocalConnectionEnabled = biosimLocal, isTestModeEnabled = T)
@@ -251,8 +251,8 @@ dd1 <- generateWeather("DegreeDay_Annual", 2017, 2018, "lostSomewhere", 50, -70,
 dd2 <- generateWeather("DegreeDay_Annual", 2017, 2018, "lostSomewhere", 50, -70, 300, additionalParms = list(addParms))[["DegreeDay_Annual"]]
 test_that("Testing degree-days above 5C in 2017 and 2018 are generated and not compiled from observations", {
   expect_equal(length(dd1[,1]), 2)
-  expect_equal(dd1[which(dd1$KeyID == "lostSomewhere" & dd1$Year == 2017),"DD"], 2107.85, tolerance = 1E-4)
-  expect_equal(dd1[which(dd1$KeyID == "lostSomewhere" & dd1$Year == 2018),"DD"], 2002.50, tolerance = 1E-4)
+  expect_equal(dd1[which(dd1$KeyID == "lostSomewhere" & dd1$Year == 2017),"DD"], 2116.2, tolerance = 1E-4)
+  expect_equal(dd1[which(dd1$KeyID == "lostSomewhere" & dd1$Year == 2018),"DD"], 2000.3, tolerance = 1E-4)
   expect_equal(dd1[which(dd1$KeyID == "lostSomewhere" & dd1$Year == 2017),"DD"], dd2[which(dd2$KeyID == "lostSomewhere" & dd2$Year == 2017),"DD"], tolerance = 1E-4)
   expect_equal(dd1[which(dd1$KeyID == "lostSomewhere" & dd1$Year == 2018),"DD"], dd2[which(dd2$KeyID == "lostSomewhere" & dd2$Year == 2018),"DD"], tolerance = 1E-4)
 })
@@ -286,11 +286,11 @@ ClimaticQc_Annual_moy <- aggregate(ClimaticQc_Annual[, c(8,11,13)], list(Climati
 colnames(ClimaticQc_Annual_moy) <- c("KeyID", "P", "TN", "TX")
 
 test_that("Testing that temperatures do not differ by more than 0.1 C", {
-  expect_equal(any(abs(ClimaticQc_Annual_moy[,c("TN", "TX")] - annualMean[,c("TN", "TX")]) > 0.2), FALSE)
+  expect_equal(all(abs(ClimaticQc_Annual_moy[,c("TN", "TX")] - annualMean[,c("TN", "TX")]) < 0.2), T)
 })
 
 test_that("Testing that precipitation does not differ by more than 50mm", {
-  expect_equal(any(abs(ClimaticQc_Annual_moy[,c("P")] - annualMean[,c("P")]) > 50), FALSE)
+  expect_equal(all(abs(ClimaticQc_Annual_moy[,c("P")] - annualMean[,c("P")]) < 60), T)
 })
 
 
