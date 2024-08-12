@@ -5,7 +5,8 @@
 ########################################################
 
 
-bioSimFilename <- "biosimclient-1.1.jar"
+jarFilenames <- c("biosimclient-1.2.2.jar", "json-io-4.13.0.jar", "repicea-1.10.4.jar")
+
 
 #'
 #' The settings environment for this package
@@ -66,19 +67,25 @@ settingEnv <- new.env()
 
 
 .loadBioSIMClient <- function() {
-  path <- .getLibraryPath("BioSIM", bioSimFilename)
-  J4R::connectToJava(extensionPath = path)
-  if (!J4R::checkIfClasspathContains(bioSimFilename)) {
-    stop("It seems J4R has not been able to load the biosim library.")
+  if (J4R::isConnectedToJava()) {
+    for (jarName in jarFilenames) {
+      if (!J4R::checkIfClasspathContains(jarName)) {
+        stop(paste("It seems java is running but the class path does not contain this library: ", jarName, ". Shut down J4R using the shutdownClient function first and then re-run your code."))
+      }
+    }
+  } else {
+    path <- system.file(jarFilenames, package = "BioSIM", mustWork = T)
+    J4R::connectToJava(extensionPath = path)
+    for (jarName in jarFilenames) {
+      if (!J4R::checkIfClasspathContains(jarName)) {
+        stop(paste("It seems java has not been able to load the", jarName, "library."))
+      }
+    }
   }
 }
 
 connectToBioSIMClient <- function() {
-  if (!J4R::isConnectedToJava()) {
-    .loadBioSIMClient()
-  } else if (!J4R::checkIfClasspathContains(bioSimFilename)) {
-    stop("Java is running but biosim is not part of the classpath! Please shutdown Java through the shutdownClient method first!")
-  }
+  .loadBioSIMClient()
 }
 
 
