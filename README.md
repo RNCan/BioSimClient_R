@@ -2,7 +2,8 @@
 An R client for the BioSIM Web API
 
 Authors Mathieu Fortin, Jean-Francois Lavoie - Canadian Forest Service
-Copyright (C) 2020-2022 Her Majesty the Queen in right of Canada
+
+Copyright &copy; 2020-2026 His Majesty the King in right of Canada
 
 Email: mathieu.fortin.re@gmail.com
 
@@ -25,7 +26,7 @@ This package depends on the J4R package.
 
 ## Installation and documentation ##
 
-The installation procedure and the package documentation is available at
+The installation procedure and the package documentation are available at
 https://github.com/RNCan/BioSimClient_R/wiki . 
 
 More information on BioSIM Web API and its clients can be found at https://github.com/RNCan/BioSimClient_CSharp/wiki.
