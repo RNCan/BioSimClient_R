@@ -120,4 +120,29 @@ ggplot() +
   geom_vline(xintercept = 2023) +
   ggtitle("Observed and predicted mean relative humidity in July") +
   ylab("Mean relative humidity (%)") +
-  ylim(40,80)
+  ylim(30,80)
+
+
+#### Exemple Sorel ####
+
+
+rm(list = ls())
+require(BioSIM)
+locations <- BioSIM::twoLocationsInSouthernQuebec
+
+getModelDefaultParameters("DegreeDay_Annual")
+
+addParms <- c("LowerThreshold"=5)  ### only for degree-days
+myClimate <- generateWeather(c("DegreeDay_Annual","GrowingSeason"),
+                             2017,
+                             2040,
+                             locations$Name,
+                             locations$Latitude,
+                             locations$Longitude,
+                             locations$Elevation,
+                             rcp = "RCP85",
+                             climModel = "GCM4",
+                             additionalParms = list(addParms, NULL))
+View(myClimate$DegreeDay_Annual)
+View(myClimate$GrowingSeason)
+

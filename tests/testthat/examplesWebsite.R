@@ -12,14 +12,13 @@
 # save(file = "./data/twoLocationsInSouthernQuebec.RData", twoLocationsInSouthernQuebec)
 
 library(BioSIM)
-
 locations <- BioSIM::twoLocationsInSouthernQuebec
 print(locations)
 
 summerMean <- getNormals("1981_2010", locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, c("June", "July", "August"))
 summerMean
-J4R::shutdownClient()
 
+J4R::shutdownClient()
 
 monthlyMeans <- getMonthlyNormals("1981_2010", locations$Name, locations$Latitude, locations$Longitude, locations$Elevation)
 monthlyMeans
