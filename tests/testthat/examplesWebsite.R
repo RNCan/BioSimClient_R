@@ -15,6 +15,17 @@ library(BioSIM)
 locations <- BioSIM::twoLocationsInSouthernQuebec
 print(locations)
 
+getModelList()
+
+output <- BioSIM::generateWeather("Soil_Moisture_Index_Annual",
+                        2031,
+                        2036,
+                        locations$KeyID,
+                        locations$Latitude,
+                        locations$Longitude,
+                        locations$Elevation)
+View(output$Soil_Moisture_Index_Annual)
+
 summerMean <- getNormals("1981_2010", locations$Name, locations$Latitude, locations$Longitude, locations$Elevation, c("June", "July", "August"))
 summerMean
 

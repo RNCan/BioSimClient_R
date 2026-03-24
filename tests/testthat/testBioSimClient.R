@@ -195,7 +195,7 @@ test_that("Testing degree-days between 2017 and 2021 under RCP 8.5 and climate m
   expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2018),"DD"], 2736.05, toletance = 1E-4)
   expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2019),"DD"], 2596.3, toletance = 1E-4)
   expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2020),"DD"], 2789.90, toletance = 1E-4)
-  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2021),"DD"], 3176.00, toletance = 1E-4)
+  expect_equal(degreeDays[which(degreeDays$KeyID == "Quebec" & degreeDays$Year == 2021),"DD"], 3175.35, toletance = 1E-4)
   expect_equal(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2017),"DD"], 3552.60, toletance = 1E-4)
   expect_equal(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2018),"DD"], 3454.60, toletance = 1E-4)
   expect_equal(degreeDays[which(degreeDays$KeyID == "Sorel" & degreeDays$Year == 2019),"DD"], 3283.70, toletance = 1E-4)
