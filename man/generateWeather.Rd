@@ -38,7 +38,7 @@ generateWeather(
 
 \item{repModel}{number of replicates on the model end (is set to 1 by default)}
 
-\item{rcp}{an representative concentration pathway (either "RCP45" or "RCP85")}
+\item{rcp}{an representative concentration pathway (either "CONSTANT_CLIMATE", "RCP45" or "RCP85")}
 
 \item{climModel}{a climatic model (either "RCM4", "GCM4" or "Hadley")}
 
@@ -49,7 +49,9 @@ a list of data.frame objects
 }
 \description{
 This function generated a meteorological time series for some locations
-and applies one or many models on this series.
+and applies one or many models on this series. Default RCP and Climate
+model are RCP45 and RCM4. The CONSTANT_CLIMATE rcp option actually
+reproduces the climate observed between 1991 and 2020.
 }
 \examples{
 

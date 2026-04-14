@@ -5,7 +5,13 @@
 ########################################################
 
 
-jarFilenames <- c("biosimclient-1.2.2.jar", "json-io-4.13.0.jar", "repicea-1.10.4.jar")
+jarFilenames <- c("biosimclient-1.3.0.jar",
+                  "json-io-4.30.0.jar",
+                  "repicea-1.17.3.jar",
+                  "java-util-2.17.0.jar",
+                  "jackson-annotations-2.20-rc1.jar",
+                  "jackson-core-2.20.0-rc1.jar",
+                  "jackson-databind-2.20.0-rc1.jar")
 
 
 #'

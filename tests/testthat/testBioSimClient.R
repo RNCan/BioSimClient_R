@@ -15,7 +15,6 @@ library(BioSIM)
 
 biosimLocal <- F
 
-
 biosimclient.config(isLocalConnectionEnabled = biosimLocal, isTestModeEnabled = T)
 
 latDeg <- runif(n = 3, min=48, max=51)
@@ -312,6 +311,51 @@ for (model in modelList) {
     expect_true(!is.null(a))
   })
 }
+
+#### Testing constant climate scenario ####
+
+pastDD <- generateWeather(c("DegreeDay_Annual"),
+                          2000,
+                          2010,
+                          "Reservoir Gouin",
+                          48.5,
+                          -74.5)[["DegreeDay_Annual"]]
+
+futureDDUnderConstantClimate <- generateWeather(c("DegreeDay_Annual"),
+                                                2080,
+                                                2090,
+                                                "Reservoir Gouin",
+                                                48.5,
+                                                -74.5,
+                                                rcp = "CONSTANT_CLIMATE")[["DegreeDay_Annual"]]
+
+futureDDUnderRCP4_5 <- generateWeather(c("DegreeDay_Annual"),
+                                       2080,
+                                       2090,
+                                       "Reservoir Gouin",
+                                       48.5,
+                                       -74.5,
+                                       rcp = "RCP45")[["DegreeDay_Annual"]]
+
+meanPastClimate <- mean(pastDD$DD)
+meanFutureConstantClimate <- mean(futureDDUnderConstantClimate$DD)
+meanfutureUnderRCP4_5 <- mean(futureDDUnderRCP4_5$DD)
+
+test_that("Comparing future and past climate under different scenarios", {
+  expect_equal(nrow(pastDD), nrow(futureDDUnderConstantClimate))
+  expect_equal(nrow(pastDD), nrow(futureDDUnderRCP4_5))
+  expect_equal(meanPastClimate, meanFutureConstantClimate, tolerance = 80)
+  expect_gt(meanfutureUnderRCP4_5 - meanFutureConstantClimate, 500)
+})
+
+
+test_that("Making sure that calls to normals with RCP CONSTANT_CLIMATE produce an exception", {
+  expect_error(getAnnualNormals("2071_2100", "Reservoir Gouin",
+                                48.5,
+                                -74.5,
+                                rcp = "CONSTANT_CLIMATE"))
+
+})
 
 
 

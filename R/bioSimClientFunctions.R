@@ -87,6 +87,9 @@ getNormals <- function(period, id, latDeg, longDeg, elevM = rep(NA, length(longD
     isSummarized <- T
   }
   jPeriod <- J4R::createJavaObject("biosimclient.BioSimEnums$Period", paste("FromNormals", period, sep=""))
+  if (rcp == "CONSTANT_CLIMATE") {
+    stop("The function does not support the CONSTANT_CLIMATE rcp!")
+  }
   jRCP <- J4R::createJavaObject("biosimclient.BioSimEnums$RCP", rcp)
   jClimModel <- J4R::createJavaObject("biosimclient.BioSimEnums$ClimateModel", climModel)
 
@@ -252,88 +255,6 @@ getModelDefaultParameters <- function(modelName) {
   return(elevM)
 }
 
-#'
-#' Generate climate and apply a model (DEPRECATED).
-#'
-#' This function generated the basic climate variables for some locations
-#' and applies a particular model on this generated climate.
-#'
-#' @param fromYr the starting date (yr) of the period (inclusive)
-#' @param toYr the ending date (yr) of the period (inclusive)
-#' @param id a vector with the ids of the plots
-#' @param latDeg the latitudes of the plots
-#' @param longDeg the longitudes of the plots
-#' @param elevM the elevations of the plots (can contain some NA, in which case BioSim relies on a digital elevation model)
-#' @param modelName a character. Should be one of the models listed in the available models (see the getModelList() method)
-#' @param isEphemeral a logical. If set to true, the generated climate is not stored on the server, which implies a greater
-#' computational burden and inconsistencies if different models are applied on the same locations. By default, it is set to
-#' true.
-#' @param rep number of replicates of generated climate (is set to 1 by default)
-#' @param repModel number of replicates on the model end (is set to 1 by default)
-#' @param rcp an representative concentration pathway (either "RCP45" or "RCP85")
-#' @param climModel a climatic model (either "RCM4", "GCM4" or "Hadley")
-#' @param additionalParms a named vector with the additional parameters if needed
-#'
-#' @return a data.frame object
-#'
-#' @examples
-#'
-#' locations <- BioSIM::twoLocationsInSouthernQuebec
-#' addParms <- c("LowerThreshold"=5)
-#' \dontrun{
-#' degreeDays <- getModelOutput(2017, 2021, locations$Name, locations$Latitude,
-#'                              locations$Longitude, locations$Elevation, "DegreeDay_Annual",
-#'                              rcp = "RCP85", climModel = "GCM4", additionalParms = addParms)}
-#'
-#' @export
-getModelOutput <- function(fromYr, toYr, id, latDeg, longDeg, elevM = rep(NA, length(longDeg)), modelName, isEphemeral = T, rep = 1, repModel = 1, rcp = "RCP45", climModel = "RCM4", additionalParms = NULL) {
-  .Deprecated(new = "generateModelOutput",
-              msg = "Function getModelOutput has a signature that can cause trouble in some cases. For this reason, it is now deprecated. Please use the generateModelOutput function instead.")
-  return(generateModelOutput(modelName, fromYr, toYr, id, latDeg, longDeg, elevM, isEphemeral, rep, repModel, rcp, climModel, additionalParms))
-}
-
-
-#'
-#' Generate climate and apply a model (DEPRECATED).
-#'
-#' This function generated the basic climate variables for some locations
-#' and applies a particular model on this generated climate.
-#'
-#' @param modelName a character. Should be one of the models listed in the available models (see the getModelList() method)
-#' @param fromYr the starting date (yr) of the period (inclusive)
-#' @param toYr the ending date (yr) of the period (inclusive)
-#' @param id a vector with the ids of the plots
-#' @param latDeg the latitudes of the plots
-#' @param longDeg the longitudes of the plots
-#' @param elevM the elevations of the plots (can contain some NA or can be NULL, in which cases BioSim relies on a digital elevation model)
-#' @param isEphemeral a logical. If set to true, the generated climate is not stored on the server, which implies a greater
-#' computational burden and inconsistencies if different models are applied on the same locations. By default, it is set to
-#' true.
-#' @param rep number of replicates of generated climate (is set to 1 by default)
-#' @param repModel number of replicates on the model end (is set to 1 by default)
-#' @param rcp an representative concentration pathway (either "RCP45" or "RCP85")
-#' @param climModel a climatic model (either "RCM4", "GCM4" or "Hadley")
-#' @param additionalParms a named vector with the additional parameters if needed
-#'
-#' @return a data.frame object
-#'
-#' @examples
-#'
-#' locations <- BioSIM::twoLocationsInSouthernQuebec
-#' addParms <- c("LowerThreshold"=5)
-#' \dontrun{
-#' degreeDays <- generateModelOutput("DegreeDay_Annual", 2017, 2021, locations$Name, locations$Latitude,
-#'                              locations$Longitude, locations$Elevation,
-#'                              rcp = "RCP85", climModel = "GCM4", additionalParms = addParms)}
-#'
-#' @export
-generateModelOutput <- function(modelName, fromYr, toYr, id, latDeg, longDeg,
-                                elevM = rep(NA, length(longDeg)), isEphemeral = T, rep = 1,
-                                repModel = 1, rcp = "RCP45", climModel = "RCM4", additionalParms = NULL) {
-  .Deprecated(new = "generateModelOutput",
-              msg = "Function generateModelOutput is deprecated. Please use the generateWeather function.")
-}
-
 
 .setKeyID <- function(outputDataFrame, id) {
   InnerKeyID <- 1:length(id)
@@ -346,34 +267,16 @@ generateModelOutput <- function(modelName, fromYr, toYr, id, latDeg, longDeg,
   return(outputDataFrameFinal[,-1])
 }
 
-#'
-#' Clear the cache of the client (DEPRECATED).
-#'
-#' When using the weather generator, some objects are stored in memory on the server and
-#' a reference is stored in the client, so that subsequent calls on models for the same
-#' location and time interval does not have to generate the climate over and over again.
-#' After a while it may happen that a large number of objects are kept in memory. This method
-#' clears this cache on both the server and the client ends.
-#'
-#' @examples
-#'
-#' \dontrun{
-#' clearCache()}
-#'
-#' @export
-clearCache <- function() {
-  .Deprecated(new = "clearCache",
-              msg = "This function is now useless.")
-  #  J4R::callJavaMethod("biosimclient.BioSimClient", "clearCache")
-}
-
 
 
 #'
 #' Generate a meteorological time series and apply one or many models.
 #'
 #' This function generated a meteorological time series for some locations
-#' and applies one or many models on this series.
+#' and applies one or many models on this series. Default RCP and Climate
+#' model are RCP45 and RCM4. The CONSTANT_CLIMATE rcp option actually
+#' reproduces the climate observed between 1991 and 2020.
+#'
 #'
 #' @param modelNames a character or a vector of character. Should be one or some models listed in the available models (see the getModelList() method)
 #' @param fromYr the starting date (yr) of the period (inclusive)
@@ -384,7 +287,7 @@ clearCache <- function() {
 #' @param elevM the elevations of the plots (can contain some NA or can be NULL, in which cases BioSim relies on a digital elevation model)
 #' @param rep number of replicates of generated climate (is set to 1 by default)
 #' @param repModel number of replicates on the model end (is set to 1 by default)
-#' @param rcp an representative concentration pathway (either "RCP45" or "RCP85")
+#' @param rcp an representative concentration pathway (either "CONSTANT_CLIMATE", "RCP45" or "RCP85")
 #' @param climModel a climatic model (either "RCM4", "GCM4" or "Hadley")
 #' @param additionalParms a list of named vectors with the additional parameters if needed
 #'
