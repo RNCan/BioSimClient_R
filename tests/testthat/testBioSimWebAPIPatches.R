@@ -17,11 +17,13 @@ biosimLocal <- F
 
 biosimclient.config(isLocalConnectionEnabled = biosimLocal, isTestModeEnabled = T)
 
-MODELS_WITH_MISSING_INITIAL_YEAR <- c("BudBurst", "Climate_Mosture_Index_Annual", "Gypsy_Moth_Seasonality", "HemlockWoollyAdelgid_Annual",
-  "MPB_Cold_Tolerance_Annual", "Spruce_Budworm_Biology_Annual", "SpruceBeetle")
+# MODELS_WITH_MISSING_INITIAL_YEAR <- c("BudBurst", "Climate_Moisture_Index_Annual", "Gypsy_Moth_Seasonality", "HemlockWoollyAdelgid_Annual",
+#   "MPB_Cold_Tolerance_Annual", "Spruce_Budworm_Biology_Annual", "SpruceBeetle")
+MODELS_WITH_MISSING_INITIAL_YEAR <- c("BudBurst", "Climate_Moisture_Index_Annual", "Gypsy_Moth_Seasonality", "MPB_Cold_Tolerance_Annual", "Spruce_Budworm_Biology_Annual", "SpruceBeetle")
 
-MODELS_REQUIRING_MORE_THAN_ONE_YEAR <- c("EmeraldAshBorerColdHardiness_Annual", "HemlockWoollyAdelgid_Daily", "MPB_Cold_Tolerance_Daily",
-  "MPB_SLR", "Standardised_Precipitation_Evapotranspiration_Index")
+# MODELS_REQUIRING_MORE_THAN_ONE_YEAR <- c("EmeraldAshBorerColdHardiness_Annual", "HemlockWoollyAdelgid_Daily", "MPB_Cold_Tolerance_Daily",
+#   "MPB_SLR", "Standardised_Precipitation_Evapotranspiration_Index")
+MODELS_REQUIRING_MORE_THAN_ONE_YEAR <- c("EmeraldAshBorerColdHardiness_Annual", "MPB_Cold_Tolerance_Daily", "MPB_SLR", "Standardised_Precipitation_Evapotranspiration_Index")
 
 
 output <- generateWeather(c("DegreeDay_Annual",MODELS_WITH_MISSING_INITIAL_YEAR),

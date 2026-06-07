@@ -267,15 +267,14 @@ biosimclient.config()
 biosimclient.config(isLocalConnectionEnabled = biosimLocal, isTestModeEnabled = T)
 
 
-
-annualMean <- getAnnualNormals("1981_2010", locations$Name, locations$Latitude, locations$Longitude, locations$Elevation)
+annualMean <- getAnnualNormals("1981_2010", locations[1,"Name"], locations[1,"Latitude"], locations[1, "Longitude"], locations[1, "Elevation"])
 biosimclient.config(forceClimateGenerationEnabled = T)
 ClimaticQc_Annual <- generateWeather("ClimaticQc_Annual",
                                     1981, 2010,
-                                    locations$Name,
-                                    locations$Latitude,
-                                    locations$Longitude,
-                                    locations$Elevation,
+                                    locations[1,"Name"],
+                                    locations[1,"Latitude"],
+                                    locations[1, "Longitude"],
+                                    locations[1, "Elevation"],
                                     rep=10)[["ClimaticQc_Annual"]]
 biosimclient.config()
 biosimclient.config(isLocalConnectionEnabled = biosimLocal, isTestModeEnabled = T)
