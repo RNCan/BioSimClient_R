@@ -7,7 +7,6 @@
 biosimclient.config(
   forceClimateGenerationEnabled = NULL,
   nbNearestNeighbours = NULL,
-  isLocalConnectionEnabled = NULL,
   isTestModeEnabled = NULL
 )
 }
@@ -15,8 +14,6 @@ biosimclient.config(
 \item{forceClimateGenerationEnabled}{a logical}
 
 \item{nbNearestNeighbours}{an integer}
-
-\item{isLocalConnectionEnabled}{a logical (only for test purposes)}
 
 \item{isTestModeEnabled}{a logical (only for test purpose)}
 }

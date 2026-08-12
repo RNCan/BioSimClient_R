@@ -1,17 +1,18 @@
 Package: BioSIM
 Type: Package
 Title: 'BioSIM' Client for 'BioSIM' Web API 
-Version: 1.1.0
+Version: 1.1.1
 Authors@R: c(
     person("Mathieu", "Fortin", email = "mathieu.fortin.re@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6436-2727")),
     person("Remi", "Saint-Amant", email="remi.saint-amant@nrcan-rncan.gc.ca", role=c("ctb")),
+    person(c("Alex", "M"), "Chubaty", email="achubaty@for-cast.ca", role=c("ctb"), comment = c(ORCID = "0000-0001-7146-8135")),
     person("His Majesty the King in right of Canada", role=c("cph")))
 Description: Provide a client that retrieves the climate variables from the original 'BioSIM' application
    hosted on a server. The 'BioSIM' application is being developed and maintained by the Canadian Forest Service.
 URL: https://github.com/RNCan/BioSimClient_R/wiki
 Depends: R (>= 3.5.0)
 Imports: 
-    J4R (>= 1.1.9)
+    J4R (>= 1.3.0)
 Remotes:
     CWFC-CCFB/J4R
 License: LGPL-3
@@ -22,3 +23,4 @@ RoxygenNote: 7.3.3
 SystemRequirements: Java 8
 Suggests: 
     testthat
+Config/roxygen2/version: 8.0.0

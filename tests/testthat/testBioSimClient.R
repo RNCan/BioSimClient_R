@@ -13,9 +13,7 @@
 
 library(BioSIM)
 
-biosimLocal <- F
-
-biosimclient.config(isLocalConnectionEnabled = biosimLocal, isTestModeEnabled = T)
+biosimclient.config(isTestModeEnabled = T)
 
 latDeg <- runif(n = 3, min=48, max=51)
 longDeg <- runif(n = 3, min=-76, max=-66)
@@ -226,7 +224,7 @@ test_that("Testing degree-days above 5C in 2017 and 2018 are generated and not c
   expect_equal(all(degreeDays1$DD != 0), TRUE)
 })
 biosimclient.config()  ### reset the configuration
-biosimclient.config(isLocalConnectionEnabled = biosimLocal, isTestModeEnabled = T)
+biosimclient.config(isTestModeEnabled = T)
 
 
 
@@ -237,7 +235,7 @@ test_that("Testing degree-days above 5C in 2017 and 2018 for 20 nearest neighbou
   expect_equal(degreeDays[which(degreeDays$KeyID == "lostSomewhere" & degreeDays$Year == 2018),"DD"], 1253.1, tolerance = 1E-4)
 })
 biosimclient.config()  ### reset the configuration
-biosimclient.config(isLocalConnectionEnabled = biosimLocal, isTestModeEnabled = T)
+biosimclient.config(isTestModeEnabled = T)
 
 
 
@@ -264,7 +262,7 @@ test_that("Testing that we get 120 observations", {
   expect_equal(length(ClimaticQc_Annual[,1]), 120)
 })
 biosimclient.config()
-biosimclient.config(isLocalConnectionEnabled = biosimLocal, isTestModeEnabled = T)
+biosimclient.config(isTestModeEnabled = T)
 
 
 annualMean <- getAnnualNormals("1981_2010", locations[1,"Name"], locations[1,"Latitude"], locations[1, "Longitude"], locations[1, "Elevation"])
@@ -277,7 +275,7 @@ ClimaticQc_Annual <- generateWeather("ClimaticQc_Annual",
                                     locations[1, "Elevation"],
                                     rep=10)[["ClimaticQc_Annual"]]
 biosimclient.config()
-biosimclient.config(isLocalConnectionEnabled = biosimLocal, isTestModeEnabled = T)
+biosimclient.config(isTestModeEnabled = T)
 
 
 ClimaticQc_Annual_moy <- aggregate(ClimaticQc_Annual[, c(8,11,13)], list(ClimaticQc_Annual$KeyID), mean)
@@ -299,7 +297,7 @@ test_that("Testing that we get 240 observations when simulating 2 locations x 30
   expect_equal(length(ClimaticQc_Annual[,1]), 240)
 })
 biosimclient.config()
-biosimclient.config(isLocalConnectionEnabled = biosimLocal, isTestModeEnabled = T)
+biosimclient.config(isTestModeEnabled = T)
 
 
 modelList <- getModelList()
@@ -358,5 +356,14 @@ test_that("Making sure that calls to normals with RCP CONSTANT_CLIMATE produce a
 
 
 
+fwi <- generateWeather(
+  modelNames = "FWI_Daily",
+  fromYr = 1991, toYr = 1991,
+  id = 1L, latDeg = 56.34408, longDeg = -129.1691, elevM = 1284.474
+)$FWI_Daily
+
+test_that("Testing that FWI on July 11th makes sense", {
+  expect_equal(fwi[which(fwi$Month == 7 & fwi$Day == 11),"ISI"], 6.49936e-05, tolerance = 1E-12)
+})
 
 shutdownClient()

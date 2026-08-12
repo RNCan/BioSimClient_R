@@ -5,9 +5,9 @@
 ########################################################
 
 
-jarFilenames <- c("biosimclient-1.3.0.jar",
+jarFilenames <- c("biosimclient-1.3.1.jar",
                   "json-io-4.30.0.jar",
-                  "repicea-1.17.3.jar",
+                  "repicea-1.17.4.jar",
                   "java-util-2.17.0.jar",
                   "jackson-annotations-2.20-rc1.jar",
                   "jackson-core-2.20.0-rc1.jar",
@@ -167,13 +167,11 @@ shutdownClient <- function() {
 #'
 #' @param forceClimateGenerationEnabled a logical
 #' @param nbNearestNeighbours an integer
-#' @param isLocalConnectionEnabled a logical (only for test purposes)
 #' @param isTestModeEnabled a logical (only for test purpose)
 #'
 #' @export
 biosimclient.config <- function(forceClimateGenerationEnabled = NULL,
                                 nbNearestNeighbours = NULL,
-                                isLocalConnectionEnabled = NULL,
                                 isTestModeEnabled = NULL) {
   if (!is.null(forceClimateGenerationEnabled)) {
     if (!is.logical(forceClimateGenerationEnabled)) {
@@ -193,14 +191,14 @@ biosimclient.config <- function(forceClimateGenerationEnabled = NULL,
     }
   }
 
-  if (!is.null(isLocalConnectionEnabled)) {
-    if (!is.logical(isLocalConnectionEnabled)) {
-      stop("The isLocalConnectionEnabled parameter must be a logical!")
-    } else {
-      connectToBioSIMClient()
-      J4R::callJavaMethod("biosimclient.BioSimClient", "setLocalConnectionEnabled", isLocalConnectionEnabled)
-    }
-  }
+  # if (!is.null(isLocalConnectionEnabled)) {
+  #   if (!is.logical(isLocalConnectionEnabled)) {
+  #     stop("The isLocalConnectionEnabled parameter must be a logical!")
+  #   } else {
+  #     connectToBioSIMClient()
+  #     J4R::callJavaMethod("biosimclient.BioSimClient", "setLocalConnectionEnabled", isLocalConnectionEnabled)
+  #   }
+  # }
 
   if (!is.null(isTestModeEnabled)) {
     if (!is.logical(isTestModeEnabled)) {
@@ -215,7 +213,7 @@ biosimclient.config <- function(forceClimateGenerationEnabled = NULL,
 
   if (is.null(forceClimateGenerationEnabled)
       && is.null(nbNearestNeighbours)
-      && is.null(isLocalConnectionEnabled)
+      # && is.null(isLocalConnectionEnabled)
       && is.null(isTestModeEnabled)) {
     connectToBioSIMClient()
     J4R::callJavaMethod("biosimclient.BioSimClient", "resetClientConfiguration")
@@ -240,12 +238,12 @@ biosimclient.getConfiguration <- function() {
   connectToBioSIMClient()
   isForceClimateGenerationEnabled <- J4R::callJavaMethod("biosimclient.BioSimClient", "isForceClimateGenerationEnabled")
   nbNearestNeighbours <- J4R::callJavaMethod("biosimclient.BioSimClient", "getNbNearestNeighbours")
-  isLocal <- J4R::callJavaMethod("biosimclient.BioSimClient", "isLocalConnectionEnabled")
+  # isLocal <- J4R::callJavaMethod("biosimclient.BioSimClient", "isLocalConnectionEnabled")
   isTesting <- J4R::callJavaMethod("biosimclient.BioSimClient", "isTestModeEnabled")
   setting <- c("isForceClimateGenerationEnabled", "nbNearestNeighbours", "isLocalConnectionEnabled", "isTestModeEnabled")
   value <- c(as.character(isForceClimateGenerationEnabled),
              as.character(nbNearestNeighbours),
-             as.character(isLocal),
+             # as.character(isLocal),
              as.character(isTesting))
   return(data.frame(setting, value))
 }
