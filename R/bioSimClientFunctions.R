@@ -174,7 +174,7 @@ getMonthlyNormals <- function(period, id, latDeg, longDeg, elevM = rep(NA, lengt
 #' @export
 getModelList <- function() {
   connectToBioSIMClient()
-  .isClientSupported
+  .isClientSupported()
   jList <- J4R::callJavaMethod("biosimclient.BioSimClient", "getModelList")
   return(J4R::getAllValuesFromListObject(jList))
 }
